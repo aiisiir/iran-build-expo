@@ -1,0 +1,12 @@
+Requirement ID,Module,Verification,Priority,Status
+FR-ED-001,Editions,Feature test,P1,Not implemented
+FR-CMS-001,CMS,Feature test,P1,Not implemented
+FR-CO-003,Company isolation,Negative authorization test,P0,Not implemented
+FR-BO-003,Booth allocation,Concurrency test on target DB,P0,Not implemented
+FR-VI-002,OTP,Expiry and rate-limit tests,P0,Not implemented
+FR-VI-005,Check-in,Idempotency test,P0,Not implemented
+FR-B2B-003,Lead isolation,Negative authorization test,P0,Not implemented
+FR-FI-002,Proforma,Domain/state tests,P1,Not implemented
+NFR-SEO-001,Public pages,HTML response test,P0,Initial homepage only
+NFR-SEO-002,Localization,Canonical/hreflang test,P0,Initial homepage only
+NFR-OPS-001,Backups,Restore drill evidence,P0,Not implemented
