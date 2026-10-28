@@ -1,0 +1,81 @@
+erDiagram
+    USERS }o--|| COMPANIES : "company users"
+    EDITIONS ||--o{ HALLS : has
+    HALLS ||--o{ BOOTHS : has
+    BOOTHS ||--o{ BOOTH_RESERVATIONS : "reserved by"
+    COMPANIES ||--o{ BOOTH_RESERVATIONS : makes
+    EDITIONS ||--o{ BOOTH_RESERVATIONS : in
+    BOOTH_RESERVATIONS ||--o| PROFORMAS : "billed by"
+    COMPANIES ||--o{ PROFORMAS : receives
+    EDITIONS ||--o{ BADGES : issues
+    COMPANIES |o--o{ BADGES : staff
+    BADGES ||--o{ SCANS : scanned
+    SCAN_POINTS ||--o{ SCANS : at
+    EDITIONS ||--o{ SCAN_POINTS : defines
+    SCAN_POINTS ||--o{ SCAN_POINT_KINDS : allows
+    USERS ||--o{ SCANS : performs
+    USERS ||--o{ AUDIT_EVENTS : acts
+
+    USERS { bigint id PK
+        string username UK
+        string password_hash
+        string role "admin|manager|company|scanner"
+        bigint company_id FK
+        bool is_active }
+    COMPANIES { bigint id PK
+        string name_fa
+        string slug UK
+        string status "pending|approved|rejected|suspended"
+        datetime approved_at }
+    EDITIONS { bigint id PK
+        string slug UK
+        date starts_on
+        string status "draft|published|archived"
+        smallint hold_minutes "default 180" }
+    HALLS { bigint id PK
+        bigint edition_id FK
+        string code "UK with edition" }
+    BOOTHS { bigint id PK
+        bigint hall_id FK
+        string code "UK with hall"
+        bigint price_rial "final net"
+        string status "active|blocked" }
+    BOOTH_RESERVATIONS { bigint id PK
+        bigint booth_id FK
+        bigint company_id FK
+        bigint edition_id FK
+        string status "held|pending_verification|confirmed|expired|cancelled"
+        datetime expires_at
+        bigint active_booth_id "generated UK"
+        string active_company_edition "generated UK" }
+    PROFORMAS { bigint id PK
+        string number UK
+        bigint reservation_id FK, UK
+        bigint amount_rial "snapshot"
+        string status "issued|awaiting_verification|settled|cancelled"
+        datetime settled_at }
+    BADGES { bigint id PK
+        bigint edition_id FK
+        string kind "visitor|exhibitor|manager"
+        string full_name
+        char token_hash UK "sha256"
+        string status "active|revoked" }
+    SCAN_POINTS { bigint id PK
+        bigint edition_id FK
+        string code
+        string type "entry|meal|zone"
+        string frequency "once_per_day|unlimited" }
+    SCAN_POINT_KINDS { bigint scan_point_id PK, FK
+        string kind PK }
+    SCANS { bigint id PK
+        bigint badge_id FK
+        bigint scan_point_id FK
+        bigint scanned_by FK
+        date service_date
+        string result "accepted|duplicate|denied|revoked"
+        string dedupe_key "UK nullable" }
+    AUDIT_EVENTS { bigint id PK
+        bigint actor_user_id FK
+        string action
+        string subject_type
+        bigint subject_id }
