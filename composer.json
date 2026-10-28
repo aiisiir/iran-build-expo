@@ -1,4 +1,5 @@
 {
+    "$schema": "https://getcomposer.org/schema.json",
     "name": "iran-build-expo/platform",
     "type": "project",
     "description": "Bilingual exhibition platform built with Laravel and Blade.",
@@ -10,11 +11,18 @@
     ],
     "license": "proprietary",
     "require": {
-        "php": "^8.3",
-        "laravel/framework": "^13.0"
+        "php": "^8.4",
+        "laravel/framework": "^13.17",
+        "laravel/tinker": "^3.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^12.0"
+        "fakerphp/faker": "^1.23",
+        "laravel/pail": "^1.2.5",
+        "laravel/pao": "^1.0.6",
+        "laravel/pint": "^1.27",
+        "mockery/mockery": "^1.6",
+        "nunomaduro/collision": "^8.6",
+        "phpunit/phpunit": "^12.5.12"
     },
     "autoload": {
         "psr-4": {
@@ -29,18 +37,38 @@
         }
     },
     "scripts": {
+        "test": [
+            "@php artisan config:clear --ansi @no_additional_args",
+            "@php artisan test"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
         ],
-        "test": "@php artisan test"
+        "post-update-cmd": [
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "pre-package-uninstall": [
+            "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
     },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
-            "php-http/discovery": false
+            "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.4.0"
         }
     },
     "minimum-stability": "stable",

@@ -1,8 +1,10 @@
 <!doctype html>
 <html lang="{{ app()->getLocale() === 'fa' ? 'fa-IR' : 'en' }}" dir="{{ app()->getLocale() === 'fa' ? 'rtl' : 'ltr' }}">
 <head>
+    <meta charset="utf-8">
     @include('components.seo.meta', ['seo' => $seo ?? []])
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url('favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/site.css') }}">
 </head>
 <body>

@@ -1,6 +1,12 @@
+@font-face { font-family: "Vazirmatn"; src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("../fonts/Poppins-Regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("../fonts/Poppins-SemiBold.woff") format("woff"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Poppins"; src: url("../fonts/Poppins-Bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+
 * { box-sizing: border-box; }
-:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #17202a; background: #f7f8fa; }
-body { margin: 0; line-height: 1.65; }
+:root { color-scheme: light; color: #17202a; background: #f7f8fa; --font-fa: "Vazirmatn", Tahoma, system-ui, sans-serif; --font-en: "Poppins", "Vazirmatn", system-ui, sans-serif; }
+body { margin: 0; line-height: 1.65; font-family: var(--font-fa); }
+html[lang="en"] body { font-family: var(--font-en); }
 a { color: #154f86; }
 .site-header, .site-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem clamp(1rem, 4vw, 4rem); background: white; }
 .site-header { border-bottom: 1px solid #e4e8ec; }
@@ -15,3 +21,5 @@ h1 { font-size: clamp(2rem, 6vw, 4.2rem); line-height: 1.15; margin: 0.5rem 0 1.
 .site-footer { border-top: 1px solid #e4e8ec; color: #5b6570; }
 .skip-link { position: absolute; inset-inline-start: -9999px; }
 .skip-link:focus { inset-inline-start: 1rem; top: 1rem; z-index: 10; background: white; padding: .5rem 1rem; }
+.error-box { text-align: center; }
+a:focus-visible { outline: 3px solid #f2b01e; outline-offset: 2px; }
