@@ -1,47 +1,44 @@
-# طراحی دیتابیس v1 — پیش‌نویس برای تأیید مالک
+# طراحی دیتابیس (نسخهٔ CMS)
 
-**وضعیت:** `needs-validation`. **تا تأیید مالک هیچ migration ساخته نمی‌شود.** نمودار: `er-diagram.png` (متن: `er-diagram.mmd`).
-**موتور:** MariaDB 10.4.34، InnoDB، `utf8mb4_unicode_ci`. زمان: منطقهٔ `Asia/Tehran` (ADR-0007). مبالغ: `BIGINT UNSIGNED` ریال.
+> جایگزین طراحی قدیمی غرفه/پرداخت/QR. آن بخش‌ها در سیستم جداگانهٔ ثبت‌نام شرکت‌ها ساخته می‌شود.
+> نمودار: `er-diagram.mmd` / `er-diagram.png`. کد: `database/migrations/2026_11_01_*`.
 
-## جدول‌ها (۱۱ جدول کسب‌وکاری)
-| جدول | کار | قید/نکتهٔ مهم |
+## قواعد عمومی
+- MariaDB 10.4، InnoDB، `utf8mb4_unicode_ci`. کلیدها `BIGINT UNSIGNED`.
+- **هر رکورد محتوایی ستون `language_id` دارد** (جدول ترجمه نداریم). صفحهٔ فارسی فقط رکوردهای فارسی را نشان می‌دهد.
+- **`translation_key`** (اختیاری): رکوردهای هم‌معنی در زبان‌های مختلف یک کلید مشترک دارند؛ برای hreflang و سوییچ زبان. یکتا روی (کلید، زبان).
+- **Soft delete** روی همهٔ جدول‌های محتوایی. رکورد حذف‌شده در دیتابیس می‌ماند و slug آن **رزرو** می‌ماند (یکتایی شامل حذف‌شده‌ها هم هست). بازیابی از پنل در نسخهٔ بعد.
+- **«فقط یکی»** (زبان پیش‌فرض، صفحهٔ اصلی هر زبان، دورهٔ جاری): ستون `1 یا NULL` + UNIQUE (MariaDB قید جزئی ندارد).
+- slug فارسی با حروف فارسی؛ از عنوان ساخته می‌شود و قابل ویرایش است.
+- فرزندان وابسته (modules، links، gallery_items، products، product_images) زبان را از والد می‌گیرند و ستون جدا ندارند.
+- متن غنی (`body`، `description`، `answer`) هنگام ذخیره با HTMLPurifier پاک می‌شود و هنگام نمایش دوباره (با cache).
+
+## جدول‌ها
+| جدول | کاربرد | یکتایی مهم |
 |---|---|---|
-| `users` | کاربران پنل | `username` یکتا؛ `role` ∈ admin/manager/company/scanner؛ `company_id` برای نقش company؛ رمز bcrypt/argon |
-| `companies` | شرکت‌ها | `status` ∈ pending/approved/rejected/suspended؛ `slug` یکتا؛ فقط approved می‌تواند رزرو کند |
-| `editions` | دوره‌های نمایشگاه | `status` ∈ draft/published/archived؛ `hold_minutes` پیش‌فرض ۱۸۰ |
-| `halls` | سالن‌ها | یکتا: (`edition_id`,`code`) |
-| `booths` | غرفه‌ها | یکتا: (`hall_id`,`code`)؛ `price_rial` قیمت نهایی؛ `status` ∈ active/blocked |
-| `booth_reservations` | رزرو/خرید غرفه | `status` ∈ held/pending_verification/confirmed/expired/cancelled؛ **دو ستون محاسبه‌شده یکتا** (زیر) |
-| `proformas` | پیش‌فاکتور | `number` یکتا؛ `reservation_id` یکتا؛ `amount_rial` snapshot؛ جدا از پرداخت |
-| `badges` | کارت‌های QR | `kind` ∈ visitor/exhibitor/manager؛ `token_hash` = SHA-256 توکن تصادفی (خود توکن ذخیره نمی‌شود) |
-| `scan_points` + `scan_point_kinds` | نقطه‌های اسکن و اینکه کدام نوع کارت مجاز است | `frequency` ∈ once_per_day/unlimited |
-| `scans` | لاگ اسکن | `dedupe_key` یکتا (nullable) برای جلوگیری از ثبت دوباره در روز |
-| `audit_events` | ممیزی | بدون رمز/توکن/OTP |
+| languages | زبان‌ها (fa, en, …)، جهت RTL/LTR | code؛ is_default |
+| users | ادمین/ویراستار؛ `position` فقط نمایشی | email |
+| editions | دورهٔ نمایشگاه | code؛ is_current |
+| media_assets | فایل‌ها (تصویر/PDF/SVG) با alt و title | path |
+| categories | دستهٔ خبر و FAQ (`type`) | (language, type, slug) |
+| pages | صفحه: SEO + متن غنی | (language, slug)؛ (language, is_home) |
+| page_modules | بلوک‌های صفحه (اخبار، لینک، متن، گالری، FAQ، شرکت‌ها، تور سه‌بعدی)؛ هرکدام عنوان/روشن‌خاموش/ترتیب | — |
+| posts | خبر، اطلاعیه، پوستر (با دسته)؛ انتشار و انقضا | (language, page, slug) |
+| link_groups / links | منو، لوگو، لینک سریع، برگزارکنندگان، حامیان، فوتر؛ منوی چندسطحی با `parent_id` | — |
+| galleries / gallery_items | گالری تصاویر | — |
+| faqs | پرسش و پاسخ | — |
+| companies / company_edition / products / product_images | شرکت‌ها، حضور در دوره، محصولات | (language, page, slug)؛ (company, slug) |
+| badge_types / badges | کارت سینه (ثبت‌نام عمومی، تأیید ادمین) | — |
+| settings | تنظیم کلید-مقدار برای هر زبان (فوتر، نام سایت، …) | (language, key) |
+| audit_events | لاگ حسابرسی فقط‌افزودنی (فقط نام فیلدهای تغییرکرده) | — |
 
-بدون جدول: sessions/cache/jobs (درایور file/sync)، password_resets (ادمین رمز را تعویض می‌کند).
+## نمایش رکورد در ماژول
+رکورد وقتی نشان داده می‌شود که: زبانش با صفحه یکی باشد، `page_id` آن برابر «صفحهٔ منبع» ماژول باشد (پیش‌فرض: همان صفحه)، دسته با فیلتر ماژول بخواند، `status=published`، `published_at ≤ الان` و `expires_at` نگذشته باشد. زمان‌بندی هنگام پرس‌وجو بررسی می‌شود (بدون cron).
 
-## قیدهای کلیدی (چطور باگ را در دیتابیس می‌بندیم)
-1. **یک غرفه = یک رزرو فعال:** `booth_reservations.active_booth_id = IF(status IN ('held','pending_verification','confirmed'), booth_id, NULL)` STORED + `UNIQUE`. (MariaDB قید مشروط ندارد؛ NULL چندبار مجاز است.)
-2. **یک شرکت = یک غرفه در هر دوره:** `active_company_edition = IF(<فعال>, CONCAT(company_id,'-',edition_id), NULL)` STORED + `UNIQUE`.
-3. **انقضای ۳ ساعته بدون cron:** زمان در قید دیتابیس نمی‌آید. هنگام رزرو جدید، داخل تراکنش ردیف غرفه `FOR UPDATE` قفل و رزروهای `held` منقضی‌شدهٔ همان غرفه/شرکت به `expired` تبدیل می‌شوند و بعد درج انجام می‌شود. خواندن‌ها (لیست عمومی) رزرو منقضی را آزاد حساب می‌کنند. (ADR-0005)
-4. **ناهار یک‌بار در روز:** `scans.dedupe_key = badge:point:date` فقط برای اسکن پذیرفته‌شدهٔ `once_per_day`؛ اسکن هم‌زمان دوم خطای یکتا می‌گیرد و «duplicate» ثبت می‌شود.
-5. **پول:** فقط عدد صحیح؛ قیمت در پیش‌فاکتور snapshot است (تغییر بعدی قیمت غرفه روی آن اثر ندارد).
+## آدرس‌ها
+`/fa` خانه · `/fa/{صفحه}` · `/fa/{صفحه}/{خبر}` · `/fa/{صفحه}/{شرکت}` · `/fa/{صفحه}/{شرکت}/{محصول}`. دسته در آدرس نیست.
 
-## تعامل با قواعد کسب‌وکار
-- شرکت ثبت‌نام می‌کند → `pending` → ادمین `approved` → انتخاب غرفه → رزرو `held` (۳ ساعت) + پیش‌فاکتور `issued`.
-- (پیشنهاد، OPEN-012) شرکت «پرداخت کردم» می‌زند → `pending_verification` (بدون انقضا) → ادمین `confirmed` + پیش‌فاکتور `settled`.
-- صفحهٔ عمومی: فقط `confirmed` با نام شرکت.
-- زرین‌پال بعداً: جدول `payments` جدا به `proformas` وصل می‌شود؛ ساختار فعلی تغییر نمی‌کند.
-
-## نقش‌ها
-admin (مدیر کل)، manager (مدیر نمایشگاه)، company (مدیر شرکت)، scanner (اپراتور اسکن). ماتریس: `docs/04-security/authorization-matrix.md`.
-
-## فعلاً خارج از طرح (بعداً با تأیید جدا)
-CMS و ترجمه/نسخه‌ها، محصولات/کاتالوگ، سرنخ B2B، حامی مالی، رسانه، پرداخت آنلاین، نقشهٔ گرافیکی (مختصات غرفه).
-
-## سؤال‌های باز مرتبط
-OPEN-011 (ثبت‌نام بازدیدکننده)، OPEN-012 (تمدید رزرو)، OPEN-013 (ثبت پرداخت دستی)، OPEN-015 (فیلدهای شرکت).
-
-## ریسک‌های فنی (باید روی MariaDB لوکال تست شوند)
-- ستون STORED با شرط `IF` و `UNIQUE` روی MariaDB 10.4 (انتظار می‌رود OK؛ **تأیید نشده**).
-- تست هم‌زمانی با چند اتصال واقعی (نه SQLite).
+## امنیت داده
+- `badges.phone/email/address` با `encrypted` cast (کلید APP_KEY) ذخیره می‌شوند؛ **کلید APP_KEY را پشتیبان بگیرید**، گم شدنش یعنی از دست رفتن این فیلدها. جستجو روی آن‌ها ممکن نیست.
+- عکس کارت سینه در storage خصوصی (خارج از وب) است، نه در `media_assets`.
+- `audit_events.changes` هرگز مقدار ندارد.
