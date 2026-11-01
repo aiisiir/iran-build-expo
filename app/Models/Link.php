@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\LinkType;
 use App\Models\Concerns\Audited;
 use App\Support\HtmlSanitizer;
+use App\Support\PublicUrl;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -60,7 +61,7 @@ class Link extends Model
     public function href(): ?string
     {
         return match ($this->type) {
-            LinkType::Page => $this->page?->path(),
+            LinkType::Page => $this->page?->isPublic() ? PublicUrl::path($this->page->path()) : null,
             LinkType::File => $this->fileMedia?->url(),
             LinkType::Url => $this->url,
         };

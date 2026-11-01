@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('language_id')->constrained();
-            $table->string('translation_key', 26)->nullable();
+            $table->string('translation_key', 64)->nullable();
             $table->foreignId('page_id')->constrained(); // the page whose URL prefixes this post
             $table->foreignId('category_id')->constrained();
             $table->foreignId('edition_id')->nullable()->constrained()->nullOnDelete();

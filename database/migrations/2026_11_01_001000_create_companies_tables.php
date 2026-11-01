@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('language_id')->constrained();
-            $table->string('translation_key', 26)->nullable();
+            $table->string('translation_key', 64)->nullable();
             $table->foreignId('page_id')->constrained(); // listing page whose URL prefixes this company
             $table->string('name', 191);
             $table->string('slug', 160);

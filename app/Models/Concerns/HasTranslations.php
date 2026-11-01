@@ -18,4 +18,10 @@ trait HasTranslations
         return $this->hasMany(static::class, 'translation_key', 'translation_key')
             ->where('language_id', '!=', $this->language_id);
     }
+
+    /** Equivalent records in other languages that are publicly visible (for hreflang and the language switcher). */
+    public function publicTranslations(): \Illuminate\Support\Collection
+    {
+        return $this->translations()->with('language')->get()->filter->isPublic()->values();
+    }
 }

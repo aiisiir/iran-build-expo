@@ -35,7 +35,7 @@ class Language extends Model
             ->where('is_active', true)->orderBy('sort_order')->get()->keyBy('code'));
     }
 
-    public static function default(): self
+    public static function default(): ?self
     {
         return static::active()->first(fn ($l) => $l->is_default) ?? static::active()->first();
     }

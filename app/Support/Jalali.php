@@ -18,6 +18,8 @@ final class Jalali
         return self::d2j(self::g2d($gy, $gm, $gd));
     }
 
+    private const MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+
     /** @return array{0:int,1:int,2:int} [gy, gm, gd] */
     public static function toGregorian(int $jy, int $jm, int $jd): array
     {
@@ -32,6 +34,8 @@ final class Jalali
             'Y' => sprintf('%04d', $jy),
             'm' => sprintf('%02d', $jm),
             'd' => sprintf('%02d', $jd),
+            'j' => (string) $jd,
+            'F' => self::MONTHS[$jm - 1],
         ]);
     }
 

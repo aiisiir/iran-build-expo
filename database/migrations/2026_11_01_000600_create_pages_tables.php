@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('pages', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('language_id')->constrained();
-            $table->string('translation_key', 26)->nullable();
+            $table->string('translation_key', 64)->nullable();
             $table->string('title', 191);
             $table->string('slug', 160);
             $table->boolean('is_home')->nullable(); // 1 for the language's home page, NULL otherwise

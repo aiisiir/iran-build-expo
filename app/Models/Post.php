@@ -60,6 +60,13 @@ class Post extends Model
         return $this->belongsTo(MediaAsset::class, 'image_id');
     }
 
+    public function isPublic(): bool
+    {
+        return $this->status === PublishStatus::Published
+            && ($this->published_at === null || $this->published_at <= now())
+            && ($this->expires_at === null || $this->expires_at > now());
+    }
+
     public function path(): string
     {
         return "/{$this->language->code}/{$this->page->slug}/{$this->slug}";

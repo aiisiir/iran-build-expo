@@ -58,6 +58,11 @@ class Company extends Model
         return $this->belongsToMany(Edition::class)->withTimestamps();
     }
 
+    public function isPublic(): bool
+    {
+        return $this->is_active;
+    }
+
     public function path(): string
     {
         return "/{$this->language->code}/{$this->page->slug}/{$this->slug}";

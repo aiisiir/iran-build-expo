@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    // The one external origin allowed in an <iframe> (virtual tour page). Replace the placeholder before launch.
+    'tour3d' => ['url' => env('TOUR3D_URL', 'https://DUMMY-3DTour.invalid')],
+
 ];

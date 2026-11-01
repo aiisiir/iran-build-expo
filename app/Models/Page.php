@@ -9,6 +9,7 @@ use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasTranslations;
 use App\Models\Concerns\Publishable;
 use App\Support\HtmlSanitizer;
+use App\Support\Slug;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +19,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'translation_key', 'title', 'slug', 'body', 'meta_title', 'meta_description', 'og_media_id', 'noindex', 'status', 'published_at'])]
 class Page extends Model
 {
-    use Audited, HasSingletonFlag, HasSlug, HasTranslations, Publishable, SoftDeletes;
+    use Audited, HasSingletonFlag, HasTranslations, Publishable, SoftDeletes;
+    use HasSlug {
+        slugTaken as private slugTakenInScope;
+    }
 
     protected array $singletonFlags = ['is_home'];
 
@@ -40,6 +44,17 @@ class Page extends Model
     protected function slugScope(): array
     {
         return ['language_id'];
+    }
+
+    /** Fixed routes live at the same level as page slugs, so those words are never handed out. */
+    protected function slugTaken(string $slug): bool
+    {
+        return in_array($slug, Slug::RESERVED, true) || $this->slugTakenInScope($slug);
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->status === PublishStatus::Published && ($this->published_at === null || $this->published_at <= now());
     }
 
     public function modules(): HasMany

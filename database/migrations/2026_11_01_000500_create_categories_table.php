@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('language_id')->constrained();
-            $table->string('translation_key', 26)->nullable(); // links equivalent records across languages (hreflang)
+            $table->string('translation_key', 64)->nullable(); // links equivalent records across languages (hreflang)
             $table->string('type', 10); // App\Enums\CategoryType
             $table->string('name', 120);
             $table->string('slug', 120);

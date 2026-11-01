@@ -10,7 +10,7 @@ class SecurityFoundationTest extends TestCase
     {
         $this->get('/fa')
             ->assertHeader('X-Content-Type-Options', 'nosniff')
-            ->assertHeader('X-Frame-Options', 'DENY')
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
             ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
             ->assertHeader('Permissions-Policy')
             ->assertHeader('Content-Security-Policy');

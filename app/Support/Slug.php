@@ -5,6 +5,8 @@ namespace App\Support;
 /** URL slugs keep Persian letters (UTF-8 URLs are valid and indexable); they are never transliterated. */
 final class Slug
 {
+    public const RESERVED = ['badge', 'admin', 'api', 'up'];
+
     public static function make(string $text, int $max = 160): string
     {
         $text = Digits::toLatin($text);

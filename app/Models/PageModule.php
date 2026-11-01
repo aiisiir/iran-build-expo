@@ -61,6 +61,12 @@ class PageModule extends Model
         return $this->belongsTo(MediaAsset::class, 'media_id');
     }
 
+    /** "auto" means a slider from 4 items up, a static grid below that. */
+    public function effectiveDisplay(): string
+    {
+        return $this->display === ModuleDisplay::Auto ? ($this->items->count() >= 4 ? 'slider' : 'grid') : $this->display->value;
+    }
+
     /** Page whose records feed this module (defaults to the module's own page). */
     public function effectiveSourcePageId(): int
     {
