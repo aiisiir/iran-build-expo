@@ -1,0 +1,12 @@
+# Uploaded files are data, never code.
+Options -Indexes -ExecCGI
+<FilesMatch "(?i)\.(php[0-9]?|phtml|phar|pht|cgi|pl|py|sh|asp|aspx|jsp|htaccess|htpasswd|ini)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    # SVG opened directly is sandboxed: no scripts, no network. Through <img> scripts never run anyway.
+    <FilesMatch "(?i)\.svg$">
+        Header always set Content-Security-Policy "sandbox; default-src 'none'; style-src 'unsafe-inline'"
+    </FilesMatch>
+</IfModule>

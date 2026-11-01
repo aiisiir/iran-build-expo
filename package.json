@@ -1,0 +1,10 @@
+{
+    "private": true,
+    "description": "Only used to download the self-hosted rich-text editor (Jodit, MIT). The site itself needs no Node at runtime.",
+    "scripts": {
+        "editor:install": "node scripts/install-editor.mjs"
+    },
+    "devDependencies": {
+        "jodit": "4.9.9"
+    }
+}
