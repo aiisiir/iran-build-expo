@@ -50,7 +50,7 @@ class PageModuleResource extends Resource
             Field::checkbox('show_title', 'نمایش عنوان'),
             Field::checkbox('is_active', 'فعال'),
             Field::number('sort_order', 'ترتیب'),
-            Field::select('display', 'نحوهٔ نمایش', Options::displays(), ['required', 'in:list,grid,slider,auto'], 'list'),
+            Field::select('display', 'نحوهٔ نمایش', Options::displays(), ['required', 'in:list,grid,slider,auto,hero'], 'list'),
             Field::number('item_limit', 'تعداد آیتم', 6),
             Field::select('source_page_id', 'صفحهٔ منبع (اخبار/شرکت‌ها)', fn () => Options::pages(), $optional('pages'), null, 'خالی = همین صفحه'),
             Field::select('category_id', 'دستهٔ خبر', fn () => Options::categories(), $optional('categories')),

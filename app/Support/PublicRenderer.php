@@ -19,6 +19,9 @@ final class PublicRenderer
     {
         $page->loadMissing('language', 'ogImage');
         $modules = $this->modules->load($page);
+        // On the home page one posts module may be shown as the hero slider instead of a normal section.
+        $hero = $page->is_home ? $modules->first(fn ($m) => $m->type->value === 'posts' && $m->display->value === 'hero') : null;
+        $modules = $modules->reject(fn ($m) => $m === $hero)->values();
         $versions = $this->versions($page);
         $name = $this->siteName($page->language);
         $path = $page->path();
@@ -32,6 +35,7 @@ final class PublicRenderer
         return view('public.page', [
             'page' => $page,
             'modules' => $modules,
+            'hero' => $hero?->items->take(4),
             'tourUrl' => config('services.tour3d.url'),
             'breadcrumbs' => $breadcrumbs,
             'translations' => $this->switcher($versions),

@@ -31,7 +31,7 @@ class PublicLayoutComposer
             'logoLink' => $links->get($groups->firstWhere('placement.value', 'logo')?->id, collect())->first(),
             'footerGroups' => $groups->filter(fn ($g) => $g->placement->value === 'footer')
                 ->map(fn ($g) => ['group' => $g, 'links' => $this->tree($links, $g)]),
-            'switcher' => Language::active()->except($language->code)
+            'switcher' => Language::active()->reject(fn (Language $l) => $l->code === $language->code)
                 ->map(fn (Language $l) => ['language' => $l, 'url' => $switch[$l->code] ?? url('/'.$l->code)]),
         ]);
     }

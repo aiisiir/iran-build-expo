@@ -23,7 +23,12 @@ class SettingsController
 
     public function update(Request $request): RedirectResponse
     {
-        $request->validate(['settings.*.*' => ['nullable', 'string', 'max:2000']]);
+        $request->validate([
+            'settings.*.*' => ['nullable', 'string', 'max:2000'],
+            // Local files only (the CSP allows media from this site alone).
+            'settings.*.home_video_url' => ['nullable', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'],
+            'settings.*.home_video_poster_url' => ['nullable', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'],
+        ]);
 
         foreach (Language::active() as $language) {
             SiteSettings::save($language->id, (array) $request->input("settings.{$language->id}", []));

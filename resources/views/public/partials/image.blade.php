@@ -2,4 +2,4 @@
 <img @if (! empty($class)) class="{{ $class }}" @endif src="{{ $media->url() }}" alt="{{ $alt ?? $media->alt }}"
      @if ($media->width && $media->height) width="{{ $media->width }}" height="{{ $media->height }}" @endif
      @if ($media->title) title="{{ $media->title }}" @endif
-     loading="{{ ! empty($eager) ? 'eager' : 'lazy' }}" decoding="async">
+     loading="{{ ! empty($eager) ? 'eager' : 'lazy' }}" decoding="async" @if (! empty($priority)) fetchpriority="high" @endif>

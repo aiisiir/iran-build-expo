@@ -95,7 +95,7 @@ final class Options
 
     public static function displays(): array
     {
-        return ['list' => 'لیست', 'grid' => 'شبکه', 'slider' => 'اسلایدر', 'auto' => 'خودکار (۴ مورد یا بیشتر اسلایدر)'];
+        return ['list' => 'لیست', 'grid' => 'شبکه', 'slider' => 'اسلایدر', 'auto' => 'خودکار (۴ مورد یا بیشتر اسلایدر)', 'hero' => 'هیروی صفحهٔ اصلی (حداکثر ۴ اسلاید)'];
     }
 
     public static function linkTypes(): array

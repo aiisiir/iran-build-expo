@@ -2,10 +2,21 @@
 
 namespace Tests\Feature;
 
+use App\Models\PageModule;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\BuildsSite;
 use Tests\TestCase;
 
 class PublicHomeSeoTest extends TestCase
 {
+    use BuildsSite, RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedLanguages();
+    }
+
     public function test_root_permanently_redirects_to_the_default_farsi_locale(): void
     {
         $this->get('/')->assertStatus(301)->assertRedirect('/fa');
@@ -55,5 +66,46 @@ class PublicHomeSeoTest extends TestCase
     public function test_robots_blocks_everything_in_non_production(): void
     {
         $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /');
+    }
+
+    public function test_fallback_home_has_exactly_four_hero_slides_and_a_prioritised_first_image(): void
+    {
+        $html = $this->get('/en')->assertOk()->getContent();
+
+        $this->assertSame(4, substr_count($html, 'aria-roledescription="slide"'));
+        $this->assertSame(1, substr_count($html, 'fetchpriority="high"'));
+        $this->assertMatchesRegularExpression('/<img class="hero-image"[^>]*fetchpriority="high"/', $html);
+        $this->assertStringNotContainsString('class="btn btn-gold"', $html); // no destination, no call to action
+    }
+
+    public function test_hero_module_posts_become_slides_with_a_call_to_action(): void
+    {
+        $home = $this->makePage('fa', ['title' => 'خانه']);
+        $home->claimFlag('is_home', ['language_id' => $home->language_id]);
+        $news = $this->makePage('fa', ['title' => 'اخبار']);
+        $this->makePost($news, ['title' => 'اسلاید یک']);
+        PageModule::create(['page_id' => $home->id, 'type' => 'posts', 'title' => 'هیرو', 'source_page_id' => $news->id, 'display' => 'hero']);
+
+        $this->get('/fa')->assertOk()->assertSee('اسلاید یک')->assertSee('class="btn btn-gold"', false)
+            ->assertDontSee('معماری در مقیاس یادمانی') // built-in placeholder copy is replaced
+            ->assertDontSee('class="section module module-posts"', false);
+    }
+
+    public function test_home_has_a_single_h1_and_a_video_section_with_a_poster(): void
+    {
+        $html = $this->get('/fa')->assertOk()->getContent();
+
+        $this->assertSame(1, substr_count($html, '<h1'));
+        $this->assertStringContainsString('preload="none"', $html);
+        $this->assertStringContainsString('atmosphere-poster.jpg', $html);
+    }
+
+    public function test_language_switcher_lists_only_the_other_languages(): void
+    {
+        $html = $this->get('/en')->assertOk()->getContent();
+        preg_match('#<nav class="lang-switch".*?</nav>#s', $html, $m);
+
+        $this->assertStringContainsString('hreflang="fa-IR"', $m[0]);
+        $this->assertStringNotContainsString('hreflang="en"', $m[0]);
     }
 }

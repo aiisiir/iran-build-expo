@@ -28,11 +28,13 @@ class Language extends Model
         static::deleted($forget);
     }
 
-    /** Active languages keyed by code (cached; the routing layer reads this on every request). */
+    /** Active languages keyed by code. Cached as plain arrays: Laravel 13 refuses to unserialize objects from the cache. */
     public static function active(): Collection
     {
-        return Cache::rememberForever('languages.active', fn () => static::query()
-            ->where('is_active', true)->orderBy('sort_order')->get()->keyBy('code'));
+        $rows = Cache::rememberForever('languages.active', fn () => static::query()
+            ->where('is_active', true)->orderBy('sort_order')->get()->map->getAttributes()->all());
+
+        return static::hydrate($rows)->keyBy('code');
     }
 
     public static function default(): ?self

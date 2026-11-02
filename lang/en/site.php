@@ -15,4 +15,5 @@ return [
     'next' => 'Next',
     'tour_unavailable' => 'The virtual tour is not available.',
     'footer_nav' => 'Footer links',
+    'pagination' => 'Pagination',
 ];

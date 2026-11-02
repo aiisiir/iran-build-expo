@@ -2,10 +2,20 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\BuildsSite;
 use Tests\TestCase;
 
 class SecurityFoundationTest extends TestCase
 {
+    use BuildsSite, RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seedLanguages();
+    }
+
     public function test_security_headers_are_sent_on_pages(): void
     {
         $this->get('/fa')

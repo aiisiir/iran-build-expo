@@ -15,4 +15,5 @@ return [
     'next' => 'بعدی',
     'tour_unavailable' => 'تور مجازی در دسترس نیست.',
     'footer_nav' => 'پیوندهای پایین صفحه',
+    'pagination' => 'صفحه‌بندی',
 ];
