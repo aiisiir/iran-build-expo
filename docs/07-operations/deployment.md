@@ -29,24 +29,35 @@ domains/iranbuildexpo.mahdiarmansouri.ir/
 2. آدرس‌ها را باز کن: `/` (صفحهٔ ساده)، `/check.php`، `/rewrite-test`.
 3. خروجی `check.php` را برای Claude بفرست؛ **سپس `check.php` را حذف کن**.
 
-## مرحلهٔ ۳ — استقرار واقعی (از فاز ۳ به بعد)
-روی کامپیوتر خودت:
-1. `composer install --no-dev --optimize-autoloader` (قفل روی PHP 8.4 است).
-2. `php artisan key:generate --show` → کلید **جدید** برای production (از کلید لوکال استفاده نکن).
-3. پوشهٔ پروژه را zip کن **بدون**: `.env`، `.git`، `tests`، `node_modules`، `storage/logs/*`.
-4. zip را در File Manager داخل `app/` آپلود و Extract کن.
-5. محتوای `app/public/` را به `public_html/` منتقل کن (پوشهٔ `public` داخل `app` اضافه است؛ پاک شود).
-6. در `app/` فایل `.env` را از `.env.production.example` بساز و مقدارها را پر کن.
-7. فایل SQL را با phpMyAdmin ایمپورت کن.
-8. `storage/` و `bootstrap/cache/` باید برای PHP قابل نوشتن باشند (معمولاً 755 یا 775).
-9. `php artisan config:cache` و مشابه آن را **روی لوکال اجرا نکن** (مسیرهای لوکال داخل کش می‌رود).
+## مرحلهٔ ۳ — استقرار واقعی (تکرارپذیر؛ همین مراحل برای هر انتشار)
+روی کامپیوتر خودت (PHP 8.4):
+1. `git pull` از شاخهٔ مورد تأیید، سپس `composer install --no-dev --optimize-autoloader`.
+   - فایل `composer.lock` باید در ریپو باشد (مالک یک‌بار با `composer update` می‌سازد و commit می‌کند)؛ بدون آن نسخهٔ بسته‌ها بین دو انتشار فرق می‌کند.
+2. `php scripts/build-release.php` → فایل `release.zip` (شامل `app/` و `public_html/`؛ بدون `.env`، `.git`، `tests`، `docs`، لاگ و فایل‌های runtime). اسکریپت اگر vendor شامل بستهٔ dev باشد متوقف می‌شود.
+3. دیتابیس: روی لوکال (ترجیحاً MariaDB 10.4) `php artisan migrate --seed` و خروجی **SQL** را از phpMyAdmin بگیر (Export → Custom → ساختار + داده، `DROP TABLE` فعال). برای انتشار بعدی فقط اگر migration جدید هست، **فقط ساختار تغییرکرده** را ایمپورت کن؛ داده‌های زندهٔ سایت را بازنویسی نکن.
+4. **قبل از هر تغییر روی سرور:** از دیتابیس زنده و از `app/.env` و `public_html/uploads/` و `app/storage/app/private/` بکاپ بگیر و خارج از سرور نگه دار.
+5. `release.zip` را آپلود و Extract کن (روی همان ساختار قبلی). `.env`، `public_html/uploads/` و `storage/app/private/` داخل zip نیست و دست‌نخورده می‌ماند.
+6. اولین بار: `app/.env` را از `.env.production.example` بساز؛ `APP_KEY` را روی لوکال با `php artisan key:generate --show` بساز (کلید لوکال را استفاده نکن) و **جداگانه بکاپ بگیر**.
+7. اولین بار: SQL را ایمپورت کن. حساب مدیر با `ADMIN_EMAIL` و `ADMIN_PASSWORD` روی لوکال seed می‌شود؛ بعد از ورود رمز را عوض کن.
+8. `storage/` و `bootstrap/cache/` برای PHP قابل نوشتن باشند (755 یا 775).
+9. `php artisan config:cache` و مشابه را **روی لوکال اجرا نکن** (مسیرهای لوکال داخل کش می‌رود).
+10. در `public_html/` فایل موقت `check.php` را آپلود کن، خروجی را ببین (همه OK، `non-InnoDB tables: 0`) و **بلافاصله حذفش کن**.
 
-## چک‌لیست production
+## بازیابی و برگشت (Rollback)
+- **کد:** zip انتشار قبلی را نگه دار؛ برگشت = Extract همان zip روی `app/` و `public_html/`.
+- **دیتابیس:** برگشت = ایمپورت SQL بکاپ قبل از انتشار (با `DROP TABLE`).
+- **تست بازیابی:** قبل از لانچ یک بار بکاپ را روی دیتابیس آزمایشی ایمپورت و ورود/نمایش صفحه را بررسی کن. تا این تست انجام نشود بکاپ «تأییدشده» نیست.
+- **هدف‌ها (مالک تعیین کند):** RPO = ____ ساعت (فاصلهٔ بکاپ‌گیری)، RTO = ____ ساعت. تا مشخص شدن، پیشنهاد: بکاپ هفتگی و قبل از هر انتشار.
+
+## چک‌لیست production (بعد از هر انتشار)
 - [ ] `APP_ENV=production`، `APP_DEBUG=false`، `APP_URL=https://iranbuildexpo.mahdiarmansouri.ir`
-- [ ] `SESSION_SECURE_COOKIE=true`، `SESSION_DOMAIN` خالی
-- [ ] `check.php` حذف شده؛ `.env` از وب قابل دانلود نیست (تست: `/.env` باید 403/404 بدهد)
-- [ ] `robots.txt` و `sitemap.xml` آدرس production را نشان می‌دهند
-- [ ] بکاپ دیتابیس خارج از سرور و تست بازیابی
+- [ ] `SESSION_SECURE_COOKIE=true`، `SESSION_ENCRYPT=true`، `SESSION_DOMAIN` خالی
+- [ ] `check.php` حذف شده؛ `/.env` و `/composer.json` و `/storage/logs/` باید 403/404 بدهند
+- [ ] `/robots.txt` و `/sitemap.xml` آدرس production را نشان می‌دهند و `/admin` در robots مسدود است
+- [ ] `https://` فعال است؛ `http://` به https تغییر مسیر می‌دهد؛ هدرهای `Content-Security-Policy` و `Strict-Transport-Security` در پاسخ هستند
+- [ ] صفحهٔ اصلی `/fa` و `/en` باز می‌شود؛ ورود `/admin` کار می‌کند
+- [ ] آپلود یک تصویر آزمایشی در رسانه موفق است (GD)
+- [ ] بکاپ دیتابیس و `APP_KEY` خارج از سرور و تست بازیابی انجام شده
 
 ## ریسک‌های شناخته‌شده (پایلوت؛ طبق تصمیم مالک مانع نیستند، ثبت شده‌اند)
 1. **MariaDB 10.4 از ۱۸ ژوئن ۲۰۲۴ پایان پشتیبانی (EOL) شده** و وصلهٔ امنیتی نمی‌گیرد؛ در صورت امکان درخواست ارتقا (10.11+) به هاست.
@@ -61,4 +72,5 @@ domains/iranbuildexpo.mahdiarmansouri.ir/
 - **افزونهٔ GD** برای پردازش تصویر لازم است (خروجی `check.php` را بررسی کنید). بدون آن آپلود تصویر عمداً رد می‌شود.
 - **`APP_KEY` را پشتیبان بگیرید:** تلفن/ایمیل/آدرس کارت سینه با آن رمز می‌شود.
 - **`TOUR3D_URL`** در `.env` سرور: آدرس تور سه‌بعدی (فعلاً جای‌نگه‌دار `DUMMY-3DTour`).
-- بعد از `git pull` روی لوکال: `composer install`، `php artisan migrate --seed`، خروجی SQL از phpMyAdmin و import روی هاست (بدون SSH).
+- مسیر انتشار کامل در «مرحلهٔ ۳» بالا است.
+- `APP_URL` در production مبنای canonical، sitemap و og:image است (هدر Host درخواست نادیده گرفته می‌شود)؛ اگر دامنه عوض شد، اول `.env` را اصلاح کن.

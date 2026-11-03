@@ -8,8 +8,8 @@
     <link rel="icon" href="{{ url('favicon.ico') }}" sizes="48x48">
     <link rel="apple-touch-icon" href="{{ url('apple-touch-icon.png') }}">
     <meta name="theme-color" content="#F5EFE2">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}">
-    <script src="{{ asset('js/site.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v={{ filemtime(public_path('css/site.css')) }}">
+    <script src="{{ asset('js/site.js') }}?v={{ filemtime(public_path('js/site.js')) }}" defer></script>
 </head>
 <body class="lang-{{ $language->code }}">
     <a class="skip-link" href="#main-content">{{ __('site.skip') }}</a>

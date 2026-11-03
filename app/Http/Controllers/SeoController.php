@@ -43,10 +43,11 @@ class SeoController
             ->merge(Company::where('is_active', true)->with(['language', 'page'])->get())
             ->filter(fn ($r) => $languages->has($r->language->code));
 
-        $entries = $records->map(function ($record) use ($records, $default) {
-            $group = $record->translation_key
-                ? $records->filter(fn ($r) => $r::class === $record::class && $r->translation_key === $record->translation_key)
-                : collect([$record]);
+        // Group once (O(n)) instead of re-filtering the whole list per record.
+        $groups = $records->filter(fn ($r) => $r->translation_key)->groupBy(fn ($r) => $r::class.'|'.$r->translation_key);
+
+        $entries = $records->map(function ($record) use ($groups, $default) {
+            $group = $record->translation_key ? $groups[$record::class.'|'.$record->translation_key] : collect([$record]);
             $alternates = $group->count() > 1
                 ? $group->mapWithKeys(fn ($r) => [$r->language->htmlLang() => PublicUrl::absolute($r->path())])->all()
                 : [];
