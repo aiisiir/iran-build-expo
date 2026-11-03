@@ -43,3 +43,12 @@
 - لوگو را خودم ساختم (`public/brand/`)؛ نام برند و نام فارسی را اختراع نکن.
 - هدر با یک متغیر `--p` و scroll-driven animation؛ fallback با IntersectionObserver. وسط انتقال، کنتراست لحظه‌ای کمتر از AA است (حدود ۱۴px اسکرول).
 - تصاویر هیرو و ویدیو placeholder اصلی‌اند؛ باید با محتوای واقعی از CMS جایگزین شوند. ادعای AAA نکن مگر تست شده.
+
+## به‌روزرسانی 2026-11-03 (بازبینی کامل)
+- گزارش کامل: `docs/05-quality/review-2026-11-03.md`.
+- `User::$attributes['is_active']=true` لازم است؛ مدل تازه‌ساخته بدون reload مقدار null دارد و `EnsureActiveUser` او را بیرون می‌اندازد.
+- در production آدرس‌ها روی `APP_URL` قفل است؛ دامنه که عوض شد اول `.env`.
+- انتشار فقط با `scripts/build-release.php` (vendor باید `--no-dev` باشد)؛ `.env`، uploads و `storage/app/private` داخل zip نیست.
+- MariaDB را فقط CI می‌تواند بسنجد؛ تا سبز شدن job `mariadb` ادعای «روی MariaDB تست شد» ممنوع.
+- Pint در محیط Claude اجرا نمی‌شود؛ سبک کد را مالک یا CI بررسی کند.
+- هنگام کار با `cd` به مسیر نسبی دقت کن: cwd بین فراخوانی‌ها ریست می‌شود؛ مسیر مطلق بده.
