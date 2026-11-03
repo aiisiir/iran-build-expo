@@ -5,6 +5,7 @@ use App\Http\Middleware\PreventIndexingNonProduction;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias(['set-locale' => SetLocale::class, 'admin-only' => EnsureAdmin::class]);
+        $middleware->alias(['set-locale' => SetLocale::class, 'admin-only' => EnsureAdmin::class, 'auth.session' => AuthenticateSession::class]);
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->redirectUsersTo(fn () => route('admin.dashboard'));
         // Global (not the "web" group) so that 404 responses carry these headers too.

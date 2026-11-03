@@ -7,6 +7,7 @@ use App\Models\BadgeType;
 use App\Models\Edition;
 use App\Services\PrivatePhotos;
 use App\Support\BadgeRules;
+use App\Support\PublicUrl;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class BadgeRegistrationController
         return view('public.badge', [
             'edition' => Edition::current(),
             'types' => BadgeType::where('is_active', true)->orderBy('sort_order')->pluck('name', 'id'),
-            'seo' => ['title' => __('badge.title'), 'description' => __('badge.intro'), 'canonical' => url("/{$locale}/badge"), 'robots' => 'noindex,nofollow', 'alternates' => [], 'type' => 'website'],
+            'seo' => ['title' => __('badge.title'), 'description' => __('badge.intro'), 'canonical' => PublicUrl::absolute("/{$locale}/badge"), 'robots' => 'noindex,nofollow', 'alternates' => [], 'type' => 'website'],
         ]);
     }
 

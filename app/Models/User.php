@@ -15,6 +15,9 @@ class User extends Authenticatable
 {
     use Audited, SoftDeletes;
 
+    /** Mirrors the column default so a freshly created model is active without a reload. */
+    protected $attributes = ['is_active' => true];
+
     protected function casts(): array
     {
         return [

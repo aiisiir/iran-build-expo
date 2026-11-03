@@ -92,4 +92,19 @@ class BadgeTest extends TestCase
         $this->assertSame(1, $badge->fresh()->print_count);
         $this->assertNotNull($badge->fresh()->reviewed_by);
     }
+
+    public function test_replacing_a_badge_photo_deletes_the_old_file(): void
+    {
+        $this->post('/fa/badge', $this->payload());
+        $badge = Badge::firstOrFail();
+        $old = $badge->photo_path;
+
+        $this->actingAs($this->editor())->put("/admin/badges/{$badge->id}", [
+            'full_name' => 'علی رضایی', 'badge_type_id' => $badge->badge_type_id, 'phone' => '09123456789', 'email' => 'ali@example.com',
+            'gender' => 'male', 'status' => 'pending', 'photo' => UploadedFile::fake()->image('new.jpg', 300, 400),
+        ])->assertSessionHasNoErrors();
+
+        Storage::disk('local')->assertMissing($old);
+        Storage::disk('local')->assertExists($badge->fresh()->photo_path);
+    }
 }

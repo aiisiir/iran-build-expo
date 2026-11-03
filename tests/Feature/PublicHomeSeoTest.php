@@ -108,4 +108,13 @@ class PublicHomeSeoTest extends TestCase
         $this->assertStringContainsString('hreflang="fa-IR"', $m[0]);
         $this->assertStringNotContainsString('hreflang="en"', $m[0]);
     }
+
+    public function test_production_urls_ignore_a_spoofed_host_header(): void
+    {
+        $this->app['env'] = 'production';
+        config(['app.url' => 'https://iranbuildexpo.test']);
+        $this->app->make(\App\Providers\AppServiceProvider::class, ['app' => $this->app])->boot();
+
+        $this->get('/fa/badge', ['Host' => 'evil.test'])->assertOk()->assertSee('https://iranbuildexpo.test/fa/badge', false)->assertDontSee('evil.test');
+    }
 }

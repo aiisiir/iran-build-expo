@@ -46,6 +46,7 @@ class BadgeController
 
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $photos->store($request->file('photo'));
+            Storage::disk('local')->delete($badge->photo_path);
         }
 
         if ($data['status'] !== $badge->status->value) {

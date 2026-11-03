@@ -150,4 +150,29 @@ class AdminTest extends TestCase
     {
         $this->actingAs($this->admin())->delete('/admin/r/languages/'.$this->lang('en')->id)->assertForbidden();
     }
+
+    public function test_the_last_active_admin_cannot_be_demoted_deactivated_or_deleted(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin);
+        $base = ['name' => 'Admin', 'email' => 'admin@test.test', 'position' => ''];
+
+        $this->put("/admin/r/users/{$admin->id}", $base + ['role' => 'editor', 'is_active' => 1])->assertSessionHasErrors('role');
+        $this->put("/admin/r/users/{$admin->id}", $base + ['role' => 'admin'])->assertSessionHasErrors('role');
+        $this->delete("/admin/r/users/{$admin->id}")->assertForbidden();
+
+        $this->admin(['email' => 'second@test.test']); // a second active admin makes demotion legitimate
+        $this->put("/admin/r/users/{$admin->id}", $base + ['role' => 'editor', 'is_active' => 1])->assertSessionHasNoErrors();
+    }
+
+    public function test_deactivating_a_user_ends_the_session_that_is_already_open(): void
+    {
+        $editor = $this->editor();
+        $this->actingAs($editor)->get('/admin')->assertOk();
+
+        $editor->forceFill(['is_active' => false])->save();
+
+        $this->get('/admin')->assertRedirect('/admin/login');
+        $this->assertGuest();
+    }
 }

@@ -13,7 +13,8 @@ final class ImageStore
 {
     public const MAX_BYTES = 2 * 1024 * 1024;
 
-    private const MAX_PIXELS = 36_000_000; // refuses decompression bombs (6000 x 6000)
+    // Refuses decompression bombs: GD needs ~4 bytes/pixel, twice while rotating/scaling, and shared hosts allow 128-256 MB.
+    private const MAX_PIXELS = 16_000_000;
 
     private const MAX_SIDE = 2400;
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Support\Facades\Route;
 
 // Loaded with the "web" group and the /admin prefix (see bootstrap/app.php).
@@ -14,7 +15,8 @@ Route::middleware('guest')->group(function (): void {
     Route::post('login', [LoginController::class, 'store'])->middleware('throttle:30,1');
 });
 
-Route::middleware('auth')->group(function (): void {
+// auth.session logs out other devices when a password changes; EnsureActiveUser does the same for deactivation.
+Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(function (): void {
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
 

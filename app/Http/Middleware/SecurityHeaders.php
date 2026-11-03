@@ -22,7 +22,7 @@ class SecurityHeaders
         $response = $next($request);
         $headers = $response->headers;
 
-        // Frames are blocked everywhere except the single embed origin a page opted into (see App\Support\Csp).
+        // Frames are blocked everywhere except the single embed origin a page opted into (PublicRenderer sets the request attribute csp.frame_src).
         $frame = (string) $request->attributes->get('csp.frame_src', "'none'");
         $csp = ($request->is('admin', 'admin/*') ? self::ADMIN : self::PUBLIC)."; frame-src {$frame}";
 

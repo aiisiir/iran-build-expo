@@ -12,7 +12,8 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $email = (string) env('ADMIN_EMAIL', 'admin@example.com');
+        $email = (string) env('ADMIN_EMAIL');
+        abort_if($email === '', 1, 'Set ADMIN_EMAIL in .env before seeding.');
 
         if (User::withTrashed()->where('email', $email)->exists()) {
             return;
