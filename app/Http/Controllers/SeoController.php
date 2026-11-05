@@ -8,6 +8,7 @@ use App\Models\Page;
 use App\Models\Post;
 use App\Models\Product;
 use App\Support\PublicUrl;
+use App\Support\Seo;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 
@@ -15,7 +16,7 @@ class SeoController
 {
     public function robots(): Response
     {
-        if (! app()->environment('production')) {
+        if (! Seo::indexable()) {
             return response("User-agent: *\nDisallow: /\n", 200, [
                 'Content-Type' => 'text/plain; charset=UTF-8',
                 'X-Robots-Tag' => 'noindex, nofollow, noarchive',
@@ -30,7 +31,7 @@ class SeoController
     /** Only real, currently public records; language alternates come from the shared translation_key. */
     public function sitemap(): Response
     {
-        if (! app()->environment('production')) {
+        if (! Seo::indexable()) {
             return response('', 404)->header('X-Robots-Tag', 'noindex, nofollow');
         }
 

@@ -6,6 +6,7 @@ use App\Models\Language;
 use App\Models\Page;
 use App\Support\PublicRenderer;
 use App\Support\PublicUrl;
+use App\Support\Seo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 
@@ -40,7 +41,7 @@ class PageController
             'canonical' => PublicUrl::absolute("/{$locale}"),
             'alternates' => $alternates,
             'x_default' => PublicUrl::absolute('/'.(Language::default()?->code ?? $locale)),
-            'robots' => app()->environment('production') ? 'index,follow' : 'noindex,nofollow',
+            'robots' => Seo::indexable() ? 'index,follow' : 'noindex,nofollow',
             'type' => 'website',
             'jsonld' => ['@context' => 'https://schema.org', '@type' => 'WebSite', 'name' => config('app.name'), 'url' => PublicUrl::absolute("/{$locale}"), 'inLanguage' => $languages->get($locale)->htmlLang()],
         ];

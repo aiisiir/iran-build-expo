@@ -3,7 +3,7 @@
     $description = $seo['description'] ?? '';
     $canonical = $seo['canonical'] ?? url()->current();
     $alternates = $seo['alternates'] ?? [];
-    $robots = $seo['robots'] ?? (app()->environment('production') ? 'index,follow' : 'noindex,nofollow');
+    $robots = $seo['robots'] ?? (\App\Support\Seo::indexable() ? 'index,follow' : 'noindex,nofollow');
     $type = $seo['type'] ?? 'website';
     $image = $seo['image'] ?? url('images/og-default.png'); // 1200x630 brand image
 @endphp

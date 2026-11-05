@@ -14,6 +14,12 @@ final class Seo
      * @param  Collection<int, array{language: Language, path: string}>  $versions  every public language version incl. this one
      * @param  list<array{name: string, path: string}>  $breadcrumbs
      */
+    /** True only in production with SITE_INDEXABLE on; drives robots.txt, sitemap, meta robots and X-Robots-Tag. */
+    public static function indexable(): bool
+    {
+        return app()->environment('production') && config('app.indexable');
+    }
+
     public static function make(Language $language, string $title, ?string $description, string $path, Collection $versions, string $type = 'website', bool $noindex = false, ?MediaAsset $image = null, array $jsonld = [], array $breadcrumbs = []): array
     {
         $alternates = $versions->count() > 1
@@ -38,7 +44,7 @@ final class Seo
             'canonical' => PublicUrl::absolute($path),
             'alternates' => $alternates,
             'x_default' => $alternates && $defaultVersion ? PublicUrl::absolute($defaultVersion['path']) : null,
-            'robots' => app()->environment('production') && ! $noindex ? 'index,follow' : 'noindex,nofollow',
+            'robots' => self::indexable() && ! $noindex ? 'index,follow' : 'noindex,nofollow',
             'type' => $type,
             'image' => $image ? $image->url() : null,
             'jsonld' => $graph ? ['@context' => 'https://schema.org', '@graph' => $graph] : null,

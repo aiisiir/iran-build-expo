@@ -117,4 +117,18 @@ class PublicHomeSeoTest extends TestCase
 
         $this->get('/fa/badge', ['Host' => 'evil.test'])->assertOk()->assertSee('https://iranbuildexpo.test/fa/badge', false)->assertDontSee('evil.test');
     }
+
+    public function test_site_indexable_switch_keeps_a_production_draft_out_of_search_engines(): void
+    {
+        $this->app['env'] = 'production';
+
+        config(['app.indexable' => false]);
+        $this->get('/fa')->assertHeader('X-Robots-Tag', 'noindex, nofollow, noarchive')->assertSee('name="robots" content="noindex,nofollow"', false);
+        $this->get('/robots.txt')->assertSee('Disallow: /');
+        $this->get('/sitemap.xml')->assertNotFound();
+
+        config(['app.indexable' => true]);
+        $this->get('/fa')->assertHeaderMissing('X-Robots-Tag')->assertSee('name="robots" content="index,follow"', false);
+        $this->get('/sitemap.xml')->assertOk();
+    }
 }

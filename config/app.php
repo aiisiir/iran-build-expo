@@ -54,6 +54,9 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Master switch for search engines: set SITE_INDEXABLE=false in .env while the site is a draft/demo.
+    'indexable' => (bool) env('SITE_INDEXABLE', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
