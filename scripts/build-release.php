@@ -48,7 +48,9 @@ $files = $add($root, 'app/', function (string $rel) use ($skipTop): bool {
         || preg_match('#^bootstrap/cache/.+\.php$#', $rel)
         || str_ends_with($rel, '.sqlite');
 });
-$files += $add("$root/public", 'public_html/', fn (string $rel): bool => $rel === 'hot' || str_starts_with($rel, 'build/.'));
+$files += $add("$root/public", 'public_html/', fn (string $rel): bool => $rel === 'hot' || str_starts_with($rel, 'build/.')
+    // Local test uploads never ship (the host keeps its own); only the tracked demo images do.
+    || (str_starts_with($rel, 'uploads/') && ! in_array($rel, ['uploads/.htaccess', 'uploads/.gitignore'], true) && ! str_starts_with($rel, 'uploads/demo/')));
 
 foreach ($emptyDirs as $d) {
     $zip->addEmptyDir("app/$d");

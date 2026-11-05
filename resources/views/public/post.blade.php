@@ -6,7 +6,7 @@
         <h1>{{ $post->title }}</h1>
         @if ($post->lead)<p class="lead">{{ $post->lead }}</p>@endif
         <p class="meta">
-            @if ($post->published_at)<time datetime="{{ $post->published_at->toDateString() }}">{{ __('site.published') }}: {{ \App\Support\DateFormat::show($post->published_at, $language) }}</time>@endif
+            @if ($post->published_at)<time datetime="{{ $post->published_at->toDateString() }}">{{ __('site.published') }}: {{ \App\Support\DateFormat::show($post->published_at, app('site.language')) }}</time>@endif
             @if ($post->source_name) · {{ __('site.source') }}: {{ $post->source_name }}@endif
         </p>
     </header>

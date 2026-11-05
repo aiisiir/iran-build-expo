@@ -160,7 +160,8 @@ body:not(.lang-fa) .brand-name { text-transform: uppercase; letter-spacing: .08e
 @keyframes reveal { from { opacity: 0; transform: translateY(24px); } }
 
 /* ---------- generic sections / prose ---------- */
-main { min-height: 60vh; }
+main { min-height: 60vh; padding-bottom: var(--space-5); }
+main:has(> article > .atmosphere:last-child) { padding-bottom: 0; } /* the dark video band meets the dark footer directly */
 .page-head h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 1.5rem 0; }
 .breadcrumbs { padding-top: 1rem; font-size: .92rem; color: var(--muted); }
 .breadcrumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; padding: 0; margin: 0; }
@@ -247,7 +248,7 @@ main { min-height: 60vh; }
 .notice.ok { background: #e6f3ea; border-color: var(--ok); color: #0d3d1e; }
 
 /* footer */
-.site-footer { background: var(--navy-950); color: var(--cream-200); margin-top: var(--space-5); padding: 3.5rem 0 1.2rem; border-top: 4px solid var(--gold-500); }
+.site-footer { background: var(--navy-950); color: var(--cream-200); margin-top: 0; padding: 3.5rem 0 1.2rem; border-top: 4px solid var(--gold-500); }
 .site-footer a { color: var(--cream-50); text-underline-offset: .25em; }
 .site-footer strong { color: var(--cream-50); display: block; margin-bottom: .4rem; }
 .footer-brand { display: flex; align-items: center; gap: .7rem; margin: 0 0 .8rem; }
