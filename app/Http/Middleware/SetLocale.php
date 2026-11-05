@@ -2,24 +2,27 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Language;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
+/** The first URL segment must be an active language (read from the database); anything else is a 404. */
 class SetLocale
 {
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = (string) $request->route('locale');
+        $language = Language::active()->get((string) $request->route('locale'));
 
-        abort_unless(in_array($locale, ['fa', 'en'], true), 404);
+        abort_if($language === null, 404);
 
-        App::setLocale($locale);
-        URL::defaults(['locale' => $locale]);
-        $request->attributes->set('active_locale', $locale);
+        App::setLocale($language->code);
+        URL::defaults(['locale' => $language->code]);
+        app()->instance('site.language', $language);
+        $request->attributes->set('active_locale', $language->code);
 
         return $next($request);
     }
