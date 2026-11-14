@@ -21,8 +21,9 @@ echo 'app/ outside web root: '.$ok(is_dir($app) && !str_starts_with((string) rea
 echo 'vendor/autoload   : '.$ok(is_file("$app/vendor/autoload.php"))."\n";
 echo 'public/ leftover  : '.(is_dir("$app/public") ? 'FAIL app/public exists (remove it; public_html is the web root)' : 'OK')."\n";
 
-foreach (['storage', 'storage/app', 'bootstrap/cache'] as $d) {
-    echo str_pad("writable $d", 18).': '.(is_dir("$app/$d") ? $ok(is_writable("$app/$d")) : 'n/a (no app yet)')."\n";
+// Sessions (admin login) and views each need their own writable folder; a missing one breaks /admin while the public site still works.
+foreach (['storage', 'storage/app', 'storage/logs', 'storage/framework/sessions', 'storage/framework/views', 'storage/framework/cache/data', 'bootstrap/cache'] as $d) {
+    echo str_pad("writable $d", 18).': '.(is_dir("$app/$d") ? $ok(is_writable("$app/$d")) : 'FAIL folder missing: create it')."\n";
 }
 
 $env = "$app/.env";
