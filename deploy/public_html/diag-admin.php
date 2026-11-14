@@ -1,6 +1,7 @@
 <?php
-// TEMPORARY: shows why /admin/login fails (class, message, file:line only). Upload to public_html, open once, then DELETE it.
+// TEMPORARY: shows why /admin/login or saving fails (class, message, file:line and table counts only). Upload to public_html, open once, then DELETE it.
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 header('Content-Type: text/plain; charset=utf-8');
 $base = is_dir(__DIR__.'/../app/bootstrap') ? __DIR__.'/../app' : __DIR__.'/..';
@@ -16,6 +17,35 @@ try {
     $e = $response->exception ?? null;
 } catch (Throwable $e) {
     echo "boot failed\n";
+}
+
+// Writes and encryption are what the public pages never use, so check them one by one.
+$step = function (string $name, Closure $fn) use ($short): void {
+    try {
+        echo str_pad($name, 22).': '.$fn()."\n";
+    } catch (Throwable $t) {
+        echo str_pad($name, 22).': FAIL '.get_class($t).': '.$short(mb_substr($t->getMessage(), 0, 300))."\n";
+    }
+};
+if (isset($app)) {
+    echo "\n";
+    $step('encrypt/decrypt', fn () => decrypt(encrypt('x')) === 'x' ? 'OK' : 'FAIL');
+    $step('file cache write', fn () => cache()->put('diag', 1, 60) && cache()->get('diag') === 1 ? 'OK' : 'FAIL');
+    foreach (['languages', 'users', 'pages', 'categories', 'audit_events'] as $t) {
+        $step("rows $t", fn () => (string) DB::table($t)->count());
+    }
+    $step('Language::active()', fn () => (string) App\Models\Language::active()->count());
+    $step('audit insert (undone)', function () {
+        DB::beginTransaction();
+        try {
+            App\Models\AuditEvent::log('diag');
+
+            return 'OK';
+        } finally {
+            DB::rollBack();
+        }
+    });
+    echo "\n";
 }
 
 if (isset($e)) {
