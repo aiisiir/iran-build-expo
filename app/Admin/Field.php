@@ -45,6 +45,8 @@ final class Field
 
     public static function select(string $name, string $label, array|Closure $options, array $rules, mixed $default = null, ?string $help = null): self
     {
+        $default ??= $name === 'language_id' ? \App\Models\Language::default()?->id : null; // forms start on the default language
+
         return new self($name, $label, 'select', $rules, $options, $help, $default);
     }
 

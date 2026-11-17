@@ -11,8 +11,9 @@
     <h2>آخرین فعالیت‌ها</h2>
     <table>
         @foreach ($events as $e)
-            <tr><td>{{ \App\Admin\Format::cell($e->created_at) }}</td><td>{{ $e->event }}</td><td>{{ $e->subject_type }} {{ $e->subject_id }}</td><td dir="ltr">{{ $e->ip }}</td></tr>
+            <tr><td>{{ \App\Admin\Format::cell($e->created_at) }}</td><td>{{ $e->user?->name ?? '—' }}</td><td>{{ $e->event }}</td><td>{{ $e->subject_type }} {{ $e->subject_id }}</td><td dir="ltr">{{ $e->ip }}</td></tr>
         @endforeach
     </table>
+    <p><a href="{{ route('admin.resource.index', 'audit') }}">مشاهدهٔ فهرست کامل فعالیت‌ها</a></p>
 @endif
 @endsection

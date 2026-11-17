@@ -10,13 +10,15 @@ use Illuminate\Http\Request;
 
 class SettingsController
 {
-    public function edit(): View
+    public function edit(Request $request): View
     {
         $languages = Language::active();
+        $current = $languages->get((string) $request->query('lang')) ?? Language::default();
 
         return view('admin.settings.edit', [
             'languages' => $languages,
-            'values' => $languages->mapWithKeys(fn ($l) => [$l->id => SiteSettings::for($l->id)]),
+            'current' => $current,
+            'values' => SiteSettings::for($current->id),
             'keys' => SiteSettings::KEYS,
         ]);
     }
@@ -30,10 +32,9 @@ class SettingsController
             'settings.*.home_video_poster_url' => ['nullable', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'],
         ]);
 
-        foreach (Language::active() as $language) {
-            SiteSettings::save($language->id, (array) $request->input("settings.{$language->id}", []));
-        }
+        $language = Language::active()->firstWhere('id', (int) $request->input('language_id')) ?? abort(422);
+        SiteSettings::save($language->id, (array) $request->input("settings.{$language->id}", []));
 
-        return back()->with('status', 'ذخیره شد.');
+        return redirect()->route('admin.settings.edit', ['lang' => $language->code])->with('status', 'ذخیره شد.');
     }
 }

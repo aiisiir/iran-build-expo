@@ -23,6 +23,8 @@ class Language extends Model
 
     protected static function booted(): void
     {
+        static::creating(fn (self $l) => $l->sort_order = $l->sort_order ?: (int) static::max('sort_order') + 1);
+
         $forget = fn () => Cache::forget('languages.active');
         static::saved($forget);
         static::deleted($forget);

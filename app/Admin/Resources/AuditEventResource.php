@@ -27,6 +27,11 @@ class AuditEventResource extends Resource
         return 'گزارش فعالیت‌ها';
     }
 
+    public function with(): array
+    {
+        return ['user'];
+    }
+
     public function fields(?Model $model): array
     {
         return [];
@@ -34,6 +39,6 @@ class AuditEventResource extends Resource
 
     public function columns(): array
     {
-        return ['زمان' => 'created_at', 'کاربر' => 'user_id', 'رویداد' => 'event', 'مورد' => 'subject_type', 'شناسه' => 'subject_id', 'IP' => 'ip', 'فیلدها' => 'changes'];
+        return ['زمان' => 'created_at', 'کاربر' => 'user.name', 'رویداد' => 'event', 'مورد' => 'subject_type', 'شناسه' => 'subject_id', 'IP' => 'ip', 'فیلدها' => 'changes'];
     }
 }

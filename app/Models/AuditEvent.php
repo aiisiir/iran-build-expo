@@ -10,6 +10,11 @@ class AuditEvent extends Model
 {
     public const UPDATED_AT = null;
 
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function log(string $event, ?Model $subject = null, array $changes = []): void
     {
         $request = request();

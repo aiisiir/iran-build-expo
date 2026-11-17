@@ -6,6 +6,7 @@ use App\Enums\MediaKind;
 use App\Models\Concerns\Audited;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['language_id', 'kind', 'path', 'original_name', 'mime', 'size', 'width', 'height', 'alt', 'title', 'created_by'])]
@@ -22,5 +23,10 @@ class MediaAsset extends Model
     public function url(): string
     {
         return url('uploads/'.$this->path);
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
     }
 }

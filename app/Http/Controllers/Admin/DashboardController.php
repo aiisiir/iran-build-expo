@@ -20,7 +20,7 @@ class DashboardController
                 'شرکت‌ها' => Company::count(),
                 'کارت سینهٔ در انتظار تأیید' => Badge::where('status', 'pending')->count(),
             ],
-            'events' => auth()->user()->isAdmin() ? AuditEvent::latest('id')->limit(10)->get() : collect(),
+            'events' => auth()->user()->isAdmin() ? AuditEvent::with('user')->latest('id')->limit(10)->get() : collect(),
         ]);
     }
 }

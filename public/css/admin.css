@@ -59,3 +59,8 @@ code { background: #eef1f5; padding: .1rem .3rem; border-radius: 4px; }
 .login-box h1 { margin: 0; }
 .login-box label { display: grid; gap: .3rem; font-weight: 600; }
 @media (max-width: 800px) { body.admin { flex-direction: column; } .sidebar { width: 100%; } main { padding: .8rem; } }
+
+/* Language tabs (site settings) */
+.tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1rem; }
+.tabs a { padding: .4rem .9rem; border: 1px solid currentColor; border-radius: 6px; text-decoration: none; }
+.tabs a[aria-current="page"] { font-weight: 700; background: rgba(0, 0, 0, .08); }

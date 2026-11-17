@@ -6,6 +6,7 @@ use App\Models\Concerns\Audited;
 use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Fillable(['language_id', 'category_id', 'question', 'answer', 'sort_order', 'is_active'])]
@@ -21,5 +22,10 @@ class Faq extends Model
     protected static function booted(): void
     {
         static::saving(fn (self $faq) => $faq->answer = (string) HtmlSanitizer::clean($faq->answer));
+    }
+
+    public function language(): BelongsTo
+    {
+        return $this->belongsTo(Language::class);
     }
 }
