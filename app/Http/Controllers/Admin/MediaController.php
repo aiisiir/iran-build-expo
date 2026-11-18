@@ -49,6 +49,6 @@ class MediaController
     {
         MediaAsset::findOrFail($id)->delete(); // soft delete; the file stays on disk
 
-        return redirect()->route('admin.media.index')->with('status', 'حذف شد (در دیتابیس باقی می‌ماند).');
+        return redirect()->route('admin.media.index')->with('status', 'حذف شد.');
     }
 }

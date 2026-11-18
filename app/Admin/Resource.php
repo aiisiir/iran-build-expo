@@ -58,6 +58,12 @@ abstract class Resource
         return null;
     }
 
+    /** Deleted rows are soft-deleted when the model supports it, so they can be restored from the trash view. */
+    public function hasTrash(): bool
+    {
+        return in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model()), true);
+    }
+
     /** Cross-field validation; throw ValidationException on failure. */
     public function check(array $data, ?Model $model): void {}
 

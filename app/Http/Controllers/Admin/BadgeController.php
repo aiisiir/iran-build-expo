@@ -81,6 +81,6 @@ class BadgeController
     {
         Badge::findOrFail($id)->delete();
 
-        return redirect()->route('admin.badges.index')->with('status', 'حذف شد (در دیتابیس باقی می‌ماند).');
+        return redirect()->route('admin.badges.index')->with('status', 'حذف شد.');
     }
 }

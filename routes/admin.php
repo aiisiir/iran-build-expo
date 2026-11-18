@@ -54,5 +54,6 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
         Route::get('{id}/edit', 'edit')->whereNumber('id')->name('edit');
         Route::put('{id}', 'update')->whereNumber('id')->name('update');
         Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
+        Route::post('{id}/restore', 'restore')->whereNumber('id')->name('restore');
     });
 });

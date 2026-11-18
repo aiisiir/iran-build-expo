@@ -16,7 +16,9 @@ class ResourceController
     public function index(Request $request, Resource $resource): View
     {
         $res = $this->authorize($request, $resource);
+        $trashed = $res->hasTrash() && $request->boolean('trashed');
         $query = $res->model()::query()->with($res->with())->latest('id');
+        $trashed && $query->onlyTrashed();
 
         foreach ($res->filters() as $column) {
             if ($request->filled($column)) {
@@ -28,6 +30,7 @@ class ResourceController
             'resource' => $res,
             'rows' => $query->paginate(25)->withQueryString(),
             'filters' => $request->only($res->filters()),
+            'trashed' => $trashed,
         ]);
     }
 
@@ -69,7 +72,17 @@ class ResourceController
         abort_unless($res->canDelete($model), 403);
         $model->delete(); // soft delete: the row stays in the database
 
-        return $this->back($res, $model, 'حذف شد (در دیتابیس باقی می‌ماند).');
+        return $this->back($res, $model, 'حذف شد.');
+    }
+
+    public function restore(Request $request, Resource $resource, int $id): RedirectResponse
+    {
+        $res = $this->authorize($request, $resource, writable: true);
+        abort_unless($res->hasTrash(), 404);
+        $model = $res->model()::onlyTrashed()->findOrFail($id);
+        $model->restore();
+
+        return $this->back($res, $model, 'بازیابی شد.');
     }
 
     private function authorize(Request $request, Resource $res, bool $writable = false): Resource

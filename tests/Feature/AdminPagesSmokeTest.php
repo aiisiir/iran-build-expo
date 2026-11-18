@@ -71,4 +71,20 @@ class AdminPagesSmokeTest extends TestCase
         $this->get('/admin/r/pages')->assertOk()->assertSee('/fa');
         $this->get('/admin/ping')->assertNoContent();
     }
+
+    public function test_deleted_items_can_be_restored_from_the_trash(): void
+    {
+        $this->seedLanguages();
+        $this->seed(DemoContentSeeder::class);
+        $this->actingAs($this->admin());
+        $link = \App\Models\Link::firstOrFail();
+
+        $this->delete("/admin/r/links/{$link->id}")->assertSessionHas('status', 'حذف شد.');
+        $this->get('/admin/r/links')->assertOk()->assertDontSee('>'.$link->label.'<', false);
+        $this->get('/admin/r/links?trashed=1')->assertOk()->assertSee($link->label)->assertSee('بازیابی');
+
+        $this->post("/admin/r/links/{$link->id}/restore")->assertSessionHas('status', 'بازیابی شد.');
+        $this->assertNull($link->fresh()->deleted_at);
+        $this->post('/admin/r/audit/1/restore')->assertNotFound();
+    }
 }
