@@ -11,10 +11,10 @@ try {
     require $base.'/vendor/autoload.php';
     $app = require $base.'/bootstrap/app.php';
     $app->usePublicPath(__DIR__);
-    // ?path=/admin/... renders that admin page in-process as the first admin (GET only; prints status and error, never the page).
-    $path = isset($_GET['path']) && preg_match('#^/admin(/[\w./-]*)?$#', $_GET['path']) ? $_GET['path'] : '/admin/login';
+    // ?path=/admin/... or /fa/... renders that page in-process (admin pages as the first admin; GET only; prints status and error, never the page).
+    $path = isset($_GET['path']) && preg_match('#^/(admin|[a-z]{2,3})(/[\w./%-]*)?$#', $_GET['path']) ? $_GET['path'] : '/admin/login';
     $request = Request::create($path, 'GET', [], [], [], ['HTTPS' => 'on', 'HTTP_HOST' => parse_url((string) ($_SERVER['HTTP_HOST'] ?? ''), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? 'localhost')]);
-    if ($path !== '/admin/login') {
+    if (str_starts_with($path, '/admin') && $path !== '/admin/login') {
         $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
         $app['auth']->guard('web')->setUser(App\Models\User::where('role', 'admin')->where('is_active', true)->firstOrFail());
     }

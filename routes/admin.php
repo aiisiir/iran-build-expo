@@ -1,5 +1,6 @@
 <?php
 
+use App\Admin\Registry;
 use App\Http\Controllers\Admin\BadgeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
@@ -17,6 +18,8 @@ Route::middleware('guest')->group(function (): void {
 
 // auth.session logs out other devices when a password changes; EnsureActiveUser does the same for deactivation.
 Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(function (): void {
+    Route::get('ping', fn () => response()->noContent())->name('ping');
+
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
 
@@ -42,6 +45,8 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
         Route::put('/', 'update')->name('update');
     });
 
+    // {resource} resolves to the Resource descriptor; an unknown key is a 404.
+    Route::bind('resource', fn (string $key) => Registry::find($key) ?? abort(404));
     Route::prefix('r/{resource}')->name('resource.')->controller(ResourceController::class)->group(function (): void {
         Route::get('/', 'index')->name('index');
         Route::get('create', 'create')->name('create');

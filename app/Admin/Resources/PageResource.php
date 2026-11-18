@@ -6,6 +6,7 @@ use App\Admin\Field;
 use App\Admin\Options;
 use App\Admin\Resource;
 use App\Models\Page;
+use App\Support\PublicUrl;
 use Illuminate\Database\Eloquent\Model;
 
 class PageResource extends Resource
@@ -54,12 +55,20 @@ class PageResource extends Resource
 
     public function columns(): array
     {
-        return ['عنوان' => 'title', 'زبان' => 'language.code', 'slug' => 'slug', 'وضعیت' => 'status', 'اصلی' => 'is_home', 'انتشار' => 'published_at'];
+        return ['عنوان' => 'title', 'زبان' => 'language.code', 'آدرس' => 'public_path', 'وضعیت' => 'status', 'اصلی' => 'is_home', 'انتشار' => 'published_at'];
     }
 
     public function children(Model $model): array
     {
-        return ['بلوک‌های صفحه' => route('admin.resource.index', ['resource' => 'page-modules', 'page_id' => $model->id])];
+        return [
+            'مشاهدهٔ صفحه' => PublicUrl::path($model->load('language')->path()),
+            'بلوک‌های صفحه' => route('admin.resource.index', ['resource' => 'page-modules', 'page_id' => $model->id]),
+        ];
+    }
+
+    public function outlineView(): ?string
+    {
+        return 'admin.partials.page-outline';
     }
 
     public function afterSave(Model $model, array $data): void

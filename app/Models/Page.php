@@ -68,6 +68,12 @@ class Page extends Model
     }
 
     /** Public path without host, e.g. /fa/about (home is /fa). */
+    /** Attribute for the admin list: where the page lives on the public site. */
+    public function getPublicPathAttribute(): string
+    {
+        return $this->path();
+    }
+
     public function path(): string
     {
         $locale = $this->language->code;

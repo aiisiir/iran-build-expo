@@ -52,6 +52,12 @@ abstract class Resource
         return [];
     }
 
+    /** Optional read-only panel shown above the edit form (a Blade view that receives $model). */
+    public function outlineView(): ?string
+    {
+        return null;
+    }
+
     /** Cross-field validation; throw ValidationException on failure. */
     public function check(array $data, ?Model $model): void {}
 

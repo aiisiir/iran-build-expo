@@ -34,3 +34,13 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Session lasts 20 minutes of inactivity; while someone is typing in a form, renew it at most every 5 minutes.
+let lastPing = 0;
+document.addEventListener('input', () => {
+    if (!document.querySelector('form.form') || Date.now() - lastPing < 300000) {
+        return;
+    }
+    lastPing = Date.now();
+    fetch('/admin/ping', { credentials: 'same-origin' }).catch(() => {});
+});

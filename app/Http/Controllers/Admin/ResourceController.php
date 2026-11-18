@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Admin\Registry;
 use App\Admin\Resource;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -14,9 +13,9 @@ use Illuminate\Support\Facades\DB;
 /** One controller for every Resource: list, create, edit, soft-delete. */
 class ResourceController
 {
-    public function index(Request $request, string $resource): View
+    public function index(Request $request, Resource $resource): View
     {
-        $res = $this->resolve($request, $resource);
+        $res = $this->authorize($request, $resource);
         $query = $res->model()::query()->with($res->with())->latest('id');
 
         foreach ($res->filters() as $column) {
@@ -32,40 +31,40 @@ class ResourceController
         ]);
     }
 
-    public function create(Request $request, string $resource): View
+    public function create(Request $request, Resource $resource): View
     {
-        $res = $this->resolve($request, $resource, writable: true);
+        $res = $this->authorize($request, $resource, writable: true);
         $model = (new ($res->model()))->forceFill($request->only($res->filters()));
 
         return view('admin.resource.form', ['resource' => $res, 'model' => $model]);
     }
 
-    public function store(Request $request, string $resource): RedirectResponse
+    public function store(Request $request, Resource $resource): RedirectResponse
     {
-        $res = $this->resolve($request, $resource, writable: true);
+        $res = $this->authorize($request, $resource, writable: true);
         $model = $this->persist($res, new ($res->model()), $request);
 
         return $this->back($res, $model);
     }
 
-    public function edit(Request $request, string $resource, int $id): View
+    public function edit(Request $request, Resource $resource, int $id): View
     {
-        $res = $this->resolve($request, $resource, writable: true);
+        $res = $this->authorize($request, $resource, writable: true);
 
         return view('admin.resource.form', ['resource' => $res, 'model' => $res->model()::query()->findOrFail($id)]);
     }
 
-    public function update(Request $request, string $resource, int $id): RedirectResponse
+    public function update(Request $request, Resource $resource, int $id): RedirectResponse
     {
-        $res = $this->resolve($request, $resource, writable: true);
+        $res = $this->authorize($request, $resource, writable: true);
         $model = $this->persist($res, $res->model()::query()->findOrFail($id), $request);
 
         return $this->back($res, $model);
     }
 
-    public function destroy(Request $request, string $resource, int $id): RedirectResponse
+    public function destroy(Request $request, Resource $resource, int $id): RedirectResponse
     {
-        $res = $this->resolve($request, $resource, writable: true);
+        $res = $this->authorize($request, $resource, writable: true);
         $model = $res->model()::query()->findOrFail($id);
         abort_unless($res->canDelete($model), 403);
         $model->delete(); // soft delete: the row stays in the database
@@ -73,10 +72,9 @@ class ResourceController
         return $this->back($res, $model, 'حذف شد (در دیتابیس باقی می‌ماند).');
     }
 
-    private function resolve(Request $request, string $key, bool $writable = false): Resource
+    private function authorize(Request $request, Resource $res, bool $writable = false): Resource
     {
-        $res = Registry::find($key);
-        abort_if($res === null || ($writable && $res->readOnly), 404);
+        abort_if($writable && $res->readOnly, 404);
         abort_if($res->adminOnly && ! $request->user()->isAdmin(), 403);
 
         return $res;

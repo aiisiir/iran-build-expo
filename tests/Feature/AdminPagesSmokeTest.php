@@ -59,4 +59,16 @@ class AdminPagesSmokeTest extends TestCase
         $this->put('/admin/settings', ['language_id' => $zh->id, 'settings' => [$zh->id => ['site_name' => 'نمونه']]])->assertRedirect();
         $this->assertSame('نمونه', \App\Support\SiteSettings::for($zh->id)['site_name']);
     }
+
+    public function test_page_edit_shows_public_link_and_module_outline(): void
+    {
+        $this->seedLanguages();
+        $this->seed(DemoContentSeeder::class);
+        $this->actingAs($this->admin());
+        $home = \App\Models\Page::where('is_home', 1)->firstOrFail();
+
+        $this->get("/admin/r/pages/{$home->id}/edit")->assertOk()->assertSee('ساختار صفحه')->assertSee('آخرین اخبار')->assertSee('href="/fa"', false);
+        $this->get('/admin/r/pages')->assertOk()->assertSee('/fa');
+        $this->get('/admin/ping')->assertNoContent();
+    }
 }
