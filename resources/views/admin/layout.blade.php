@@ -15,20 +15,23 @@
 <aside class="sidebar" aria-label="منوی مدیریت">
     <a class="logo" href="{{ route('admin.dashboard') }}">{{ config('app.name') }}</a>
     <nav>
-        <a href="{{ route('admin.dashboard') }}">داشبورد</a>
-        <a href="{{ route('admin.media.index') }}">رسانه‌ها</a>
-        <a href="{{ route('admin.badges.index') }}">کارت سینه</a>
-        @if (auth()->user()->isAdmin())
-            <a href="{{ route('admin.settings.edit') }}">تنظیمات سایت</a>
-        @endif
+        <a href="{{ route('admin.dashboard') }}" @if (request()->routeIs('admin.dashboard')) aria-current="page" @endif>داشبورد</a>
+        @php
+            $isAdmin = auth()->user()->isAdmin();
+            // Extra (non-Resource) entries, appended to a group.
+            $extra = [
+                'مدیریت داده‌ها' => [['رسانه‌ها', 'admin.media.*', route('admin.media.index')], ['کارت سینه', 'admin.badges.*', route('admin.badges.index')]],
+                'سیستم' => array_merge($isAdmin ? [['تنظیمات سایت', 'admin.settings.*', route('admin.settings.edit')]] : [], [['رکوردهای حذف‌شده', 'admin.trash', route('admin.trash')]]),
+            ];
+        @endphp
         @foreach (\App\Admin\Registry::groups() as $group => $resources)
-            @php($visible = array_filter($resources, fn ($r) => ! $r->adminOnly || auth()->user()->isAdmin()))
-            @if ($visible)
-                <h2>{{ $group }}</h2>
-                @foreach ($visible as $r)
-                    <a href="{{ route('admin.resource.index', ['resource' => $r->key()]) }}">{{ $r->title() }}</a>
-                @endforeach
-            @endif
+            <h2>{{ $group }}</h2>
+            @foreach (array_filter($resources, fn ($r) => ! $r->adminOnly || $isAdmin) as $r)
+                <a href="{{ route('admin.resource.index', ['resource' => $r->key()]) }}" @if (request()->route('resource')?->key() === $r->key()) aria-current="page" @endif>{{ $r->title() }}</a>
+            @endforeach
+            @foreach ($extra[$group] ?? [] as [$label, $pattern, $url])
+                <a href="{{ $url }}" @if (request()->routeIs($pattern)) aria-current="page" @endif>{{ $label }}</a>
+            @endforeach
         @endforeach
     </nav>
 </aside>

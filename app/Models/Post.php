@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Enums\PublishStatus;
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\HasExtraCategories;
+use App\Models\Concerns\HasPlacements;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasTranslations;
 use App\Models\Concerns\Publishable;
@@ -17,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'translation_key', 'page_id', 'category_id', 'edition_id', 'title', 'slug', 'lead', 'summary', 'body', 'image_id', 'source_name', 'link_url', 'is_featured', 'sort_order', 'status', 'published_at', 'expires_at', 'meta_title', 'meta_description'])]
 class Post extends Model
 {
-    use Audited, HasSlug, HasTranslations, Publishable, SoftDeletes;
+    use Audited, HasExtraCategories, HasPlacements, HasSlug, HasTranslations, Publishable, SoftDeletes;
 
     protected function casts(): array
     {

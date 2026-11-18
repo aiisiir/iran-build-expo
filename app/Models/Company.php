@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\HasPlacements;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasTranslations;
 use App\Support\HtmlSanitizer;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'translation_key', 'page_id', 'name', 'slug', 'logo_id', 'industry', 'description', 'meta_title', 'meta_description', 'sort_order', 'is_active'])]
 class Company extends Model
 {
-    use Audited, HasSlug, HasTranslations, SoftDeletes;
+    use Audited, HasPlacements, HasSlug, HasTranslations, SoftDeletes;
 
     protected function casts(): array
     {

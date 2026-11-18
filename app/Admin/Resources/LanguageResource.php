@@ -11,6 +11,8 @@ use Illuminate\Validation\Rule;
 
 class LanguageResource extends Resource
 {
+    public bool $copyable = false;
+
     public bool $adminOnly = true;
 
     public array $virtual = ['is_default'];

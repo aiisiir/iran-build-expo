@@ -20,7 +20,7 @@ class AdminPagesSmokeTest extends TestCase
         $this->seed(DemoContentSeeder::class);
         $this->actingAs($this->admin());
 
-        foreach (['/admin', '/admin/media', '/admin/badges', '/admin/settings?language_id=1'] as $url) {
+        foreach (['/admin', '/admin/trash', '/admin/media', '/admin/badges', '/admin/settings?language_id=1'] as $url) {
             $this->get($url)->assertOk();
         }
 
@@ -81,9 +81,9 @@ class AdminPagesSmokeTest extends TestCase
 
         $this->delete("/admin/r/links/{$link->id}")->assertSessionHas('status', 'حذف شد.');
         $this->get('/admin/r/links')->assertOk()->assertDontSee('>'.$link->label.'<', false);
-        $this->get('/admin/r/links?trashed=1')->assertOk()->assertSee($link->label)->assertSee('بازیابی');
+        $this->get('/admin/trash')->assertOk()->assertSee($link->label)->assertSee('لینک‌ها')->assertSee('بازیابی');
 
-        $this->post("/admin/r/links/{$link->id}/restore")->assertSessionHas('status', 'بازیابی شد.');
+        $this->post("/admin/r/links/{$link->id}/restore", ['from' => 'trash'])->assertRedirect('/admin/trash')->assertSessionHas('status', 'بازیابی شد.');
         $this->assertNull($link->fresh()->deleted_at);
         $this->post('/admin/r/audit/1/restore')->assertNotFound();
     }

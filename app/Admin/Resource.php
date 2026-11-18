@@ -16,6 +16,9 @@ abstract class Resource
 
     public bool $readOnly = false;
 
+    /** Show the "copy" action; off for records with a unique identity (languages, users…). */
+    public bool $copyable = true;
+
     /** Set created_by/updated_by from the signed-in user. */
     public bool $tracksUsers = false;
 
@@ -89,8 +92,56 @@ abstract class Resource
         }
 
         $this->check($data, $model);
+        $this->checkRelationLanguages($fields, $data);
 
         return $data;
+    }
+
+    /** Extra pages/categories must be in the record's language, like the main ones. */
+    private function checkRelationLanguages(array $fields, array $data): void
+    {
+        foreach ($fields as $field) {
+            if (! $field->relation || empty($data[$field->name]) || empty($data['language_id'])) {
+                continue;
+            }
+
+            $related = (new ($this->model()))->{$field->relation}()->getRelated();
+
+            if ($related::query()->whereIn('id', $data[$field->name])->where('language_id', '!=', $data['language_id'])->exists()) {
+                throw ValidationException::withMessages([$field->name => 'همهٔ موردها باید هم‌زبان رکورد باشند.']);
+            }
+        }
+    }
+
+    /**
+     * Fields to copy over when a record is duplicated: called on the new, already saved copy.
+     * Resources with child rows (page modules, gallery items…) override it.
+     */
+    public function copyChildren(Model $from, Model $to): void {}
+
+    /** Make a fresh copy distinguishable and safe: draft, new slug, no unique flags. */
+    public function prepareCopy(Model $copy): void
+    {
+        foreach (['title', 'name', 'label', 'question'] as $attribute) {
+            if (isset($copy->{$attribute})) {
+                $copy->{$attribute} = mb_substr($copy->{$attribute}, 0, 170).' (کپی)';
+                break;
+            }
+        }
+
+        foreach (['slug', 'translation_key', 'is_home', 'is_current', 'is_default'] as $unique) {
+            if (array_key_exists($unique, $copy->getAttributes())) {
+                $copy->{$unique} = null;
+            }
+        }
+
+        if (array_key_exists('status', $copy->getAttributes())) {
+            $copy->status = 'draft';
+        }
+
+        if (array_key_exists('view_count', $copy->getAttributes())) {
+            $copy->view_count = 0;
+        }
     }
 
     /**

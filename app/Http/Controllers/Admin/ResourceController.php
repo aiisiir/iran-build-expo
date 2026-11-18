@@ -16,9 +16,7 @@ class ResourceController
     public function index(Request $request, Resource $resource): View
     {
         $res = $this->authorize($request, $resource);
-        $trashed = $res->hasTrash() && $request->boolean('trashed');
         $query = $res->model()::query()->with($res->with())->latest('id');
-        $trashed && $query->onlyTrashed();
 
         foreach ($res->filters() as $column) {
             if ($request->filled($column)) {
@@ -30,7 +28,6 @@ class ResourceController
             'resource' => $res,
             'rows' => $query->paginate(25)->withQueryString(),
             'filters' => $request->only($res->filters()),
-            'trashed' => $trashed,
         ]);
     }
 
@@ -82,7 +79,41 @@ class ResourceController
         $model = $res->model()::onlyTrashed()->findOrFail($id);
         $model->restore();
 
-        return $this->back($res, $model, 'بازیابی شد.');
+        return $request->input('from') === 'trash'
+            ? redirect()->route('admin.trash')->with('status', 'بازیابی شد.')
+            : $this->back($res, $model, 'بازیابی شد.');
+    }
+
+    /** Duplicate a record with all its settings (extra pages/categories, child rows) as a draft, then open it for editing. */
+    public function replicate(Request $request, Resource $resource, int $id): RedirectResponse
+    {
+        $res = $this->authorize($request, $resource, writable: true);
+        abort_unless($res->copyable, 404);
+        $source = $res->model()::query()->findOrFail($id);
+
+        $copy = DB::transaction(function () use ($res, $source): Model {
+            $copy = $source->replicate();
+            $res->prepareCopy($copy);
+
+            if ($res->tracksUsers) {
+                $copy->created_by = $copy->updated_by = auth()->id();
+            }
+
+            $copy->save();
+
+            foreach ($res->fields($source) as $field) {
+                if ($field->relation) {
+                    $copy->{$field->relation}()->sync(($field->loader)($source));
+                }
+            }
+
+            $res->copyChildren($source, $copy);
+
+            return $copy;
+        });
+
+        return redirect()->route('admin.resource.edit', ['resource' => $res->key(), 'id' => $copy->id])
+            ->with('status', 'کپی ساخته شد؛ عنوان و آدرس را بازبینی کنید.');
     }
 
     private function authorize(Request $request, Resource $res, bool $writable = false): Resource
@@ -98,7 +129,8 @@ class ResourceController
         $data = $res->validate($request, $model->exists ? $model : null);
 
         DB::transaction(function () use ($res, $model, $data): void {
-            $model->fill(Arr::except($data, $res->virtual));
+            $relations = collect($res->fields($model->exists ? $model : null))->filter(fn ($f) => $f->relation);
+            $model->fill(Arr::except($data, [...$res->virtual, ...$relations->pluck('name')]));
 
             if ($res->tracksUsers) {
                 if (! $model->exists) {
@@ -108,6 +140,12 @@ class ResourceController
             }
 
             $model->save();
+
+            foreach ($relations as $field) {
+                $main = $field->relation === 'placedPages' ? 'page_id' : 'category_id'; // the main one is not repeated as an extra
+                $model->{$field->relation}()->sync(array_diff((array) ($data[$field->name] ?? []), [$model->{$main}]));
+            }
+
             $res->afterSave($model, $data);
         });
 

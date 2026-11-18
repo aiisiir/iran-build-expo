@@ -12,6 +12,8 @@ use Illuminate\Validation\ValidationException;
 
 class UserResource extends Resource
 {
+    public bool $copyable = false;
+
     public bool $adminOnly = true;
 
     public function model(): string

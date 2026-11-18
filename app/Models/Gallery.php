@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\HasPlacements;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'edition_id', 'title', 'description', 'sort_order', 'is_active'])]
 class Gallery extends Model
 {
-    use Audited, SoftDeletes;
+    use Audited, HasPlacements, SoftDeletes;
 
     protected function casts(): array
     {

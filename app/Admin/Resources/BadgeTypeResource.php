@@ -10,6 +10,8 @@ use Illuminate\Validation\Rule;
 
 class BadgeTypeResource extends Resource
 {
+    public bool $copyable = false;
+
     public bool $adminOnly = true;
 
     public function model(): string

@@ -71,6 +71,11 @@ class PageResource extends Resource
         return 'admin.partials.page-outline';
     }
 
+    public function copyChildren(Model $from, Model $to): void
+    {
+        $to->modules()->saveMany($from->modules->map->replicate());
+    }
+
     public function afterSave(Model $model, array $data): void
     {
         if (! empty($data['is_home'])) {

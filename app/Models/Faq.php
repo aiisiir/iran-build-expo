@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\HasExtraCategories;
+use App\Models\Concerns\HasPlacements;
 use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'category_id', 'question', 'answer', 'sort_order', 'is_active'])]
 class Faq extends Model
 {
-    use Audited, SoftDeletes;
+    use Audited, HasExtraCategories, HasPlacements, SoftDeletes;
 
     protected function casts(): array
     {

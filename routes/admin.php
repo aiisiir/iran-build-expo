@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\TrashController;
 use App\Http\Middleware\EnsureActiveUser;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,8 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
 
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
+
+    Route::get('trash', TrashController::class)->name('trash');
 
     Route::prefix('media')->name('media.')->controller(MediaController::class)->group(function (): void {
         Route::get('/', 'index')->name('index');
@@ -55,5 +58,6 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
         Route::put('{id}', 'update')->whereNumber('id')->name('update');
         Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
         Route::post('{id}/restore', 'restore')->whereNumber('id')->name('restore');
+        Route::post('{id}/replicate', 'replicate')->whereNumber('id')->name('replicate');
     });
 });

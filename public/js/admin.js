@@ -12,6 +12,19 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// Form tabs: the bar is hidden in the markup so the form still works without JavaScript.
+document.querySelectorAll('.form-tabs').forEach((bar) => {
+    const tabs = [...bar.querySelectorAll('[role=tab]')];
+    const show = (active) => tabs.forEach((tab) => {
+        const on = tab === active;
+        tab.setAttribute('aria-selected', on);
+        document.getElementById(tab.getAttribute('aria-controls')).hidden = !on;
+    });
+    bar.hidden = false;
+    tabs.forEach((tab) => tab.addEventListener('click', () => show(tab)));
+    show(tabs.find((tab) => tab.getAttribute('aria-selected') === 'true') || tabs[0]);
+});
+
 window.addEventListener('DOMContentLoaded', () => {
     if (!window.Jodit) {
         return; // editor files not installed: fields stay plain textareas (content is still sanitized on the server)

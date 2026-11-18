@@ -18,7 +18,9 @@ class ItemController
         $language = app('site.language');
         $parent = Page::published()->where('language_id', $language->id)->where('slug', $page)->firstOrFail();
 
-        $post = Post::live()->where('language_id', $language->id)->where('page_id', $parent->id)->where('slug', $item)->first();
+        // A record is also reachable under the extra pages it is placed in; its canonical URL stays the main page's.
+        $post = Post::live()->where('language_id', $language->id)->where('slug', $item)->onPage($parent->id)
+            ->orderByRaw('posts.page_id = ? desc', [$parent->id])->first();
 
         if ($post) {
             // Bots would inflate the counter; real readers are already bounded by the 120/min limit.
@@ -26,11 +28,12 @@ class ItemController
                 Post::whereKey($post->id)->increment('view_count');
             }
 
-            return $this->renderer->post($post->setRelation('page', $parent));
+            return $this->renderer->post($post);
         }
 
-        $company = Company::where('language_id', $language->id)->where('page_id', $parent->id)->where('slug', $item)->where('is_active', true)->firstOrFail();
+        $company = Company::where('language_id', $language->id)->where('slug', $item)->onPage($parent->id)->where('is_active', true)
+            ->orderByRaw('companies.page_id = ? desc', [$parent->id])->firstOrFail();
 
-        return $this->renderer->company($company->setRelation('page', $parent));
+        return $this->renderer->company($company);
     }
 }

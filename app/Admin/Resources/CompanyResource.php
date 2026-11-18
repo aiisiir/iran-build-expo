@@ -38,7 +38,8 @@ class CompanyResource extends Resource
     {
         return [
             Field::select('language_id', 'زبان', fn () => Options::languages(), ['required', 'exists:languages,id']),
-            Field::select('page_id', 'صفحهٔ فهرست شرکت‌ها (پیشوند آدرس)', fn () => Options::pages(), ['required', 'exists:pages,id']),
+            Field::select('page_id', 'صفحهٔ اصلی (آدرس و canonical)', fn () => Options::pages(), ['required', 'exists:pages,id']),
+            Field::placedPages(),
             Field::text('name', 'نام شرکت', ['required', 'string', 'max:191']),
             Field::text('slug', 'نشانی (slug)', ['nullable', 'string', 'max:160'], 'خالی = خودکار از نام'),
             Field::text('translation_key', 'کلید ترجمه', ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/']),
@@ -66,6 +67,19 @@ class CompanyResource extends Resource
     public function afterSave(Model $model, array $data): void
     {
         $model->editions()->sync($data['edition_ids'] ?? []);
+    }
+
+    public function copyChildren(Model $from, Model $to): void
+    {
+        $to->editions()->sync($from->editions()->pluck('editions.id'));
+
+        foreach (\App\Models\Product::where('company_id', $from->id)->get() as $product) {
+            $copy = $product->replicate();
+            $copy->company_id = $to->id;
+            $copy->slug = null;
+            $copy->save();
+            $copy->images()->saveMany($product->images->map->replicate());
+        }
     }
 
     public function children(Model $model): array

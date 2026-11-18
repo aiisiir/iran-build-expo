@@ -2,11 +2,18 @@
 
 namespace App\Admin;
 
+use App\Enums\CategoryType;
 use Closure;
+use Illuminate\Database\Eloquent\Model;
 
 /** One form field of an admin resource: label, input type and its validation rules in a single place. */
 final class Field
 {
+    /** Form tabs in display order: key => label. */
+    public const TABS = ['general' => 'عمومی', 'place' => 'صفحه، دسته و زبان', 'content' => 'محتوا', 'media' => 'تصاویر و فایل‌ها', 'publish' => 'انتشار', 'seo' => 'سئو'];
+
+    private ?string $tab = null;
+
     private function __construct(
         public readonly string $name,
         public readonly string $label,
@@ -16,7 +23,28 @@ final class Field
         public readonly ?string $help = null,
         public readonly mixed $default = null,
         public readonly ?Closure $loader = null, // derived value for virtual fields: fn (Model) => value
+        public readonly ?string $relation = null, // multiselect: BelongsToMany/MorphToMany method that the controller syncs
     ) {}
+
+    /** Put the field on another tab than the one guessed from its name. */
+    public function in(string $tab): self
+    {
+        $this->tab = $tab;
+
+        return $this;
+    }
+
+    public function tab(): string
+    {
+        return $this->tab ?? match (true) {
+            $this->type === 'rich' => 'content',
+            (bool) preg_match('/^(language_id|translation_key|page_id|source_page_id|.*category.*|placed_pages)$/', $this->name) => 'place',
+            (bool) preg_match('/(image|media|logo|icon|file|photo)/', $this->name) => 'media',
+            (bool) preg_match('/^(meta_|og_|noindex)/', $this->name) => 'seo',
+            (bool) preg_match('/^(status|published_at|expires_at|is_active|is_featured|sort_order|show_|edition)/', $this->name) => 'publish',
+            default => 'general',
+        };
+    }
 
     public static function text(string $name, string $label, array $rules = ['nullable', 'string', 'max:191'], ?string $help = null, mixed $default = null): self
     {
@@ -50,9 +78,24 @@ final class Field
         return new self($name, $label, 'select', $rules, $options, $help, $default);
     }
 
-    public static function multiselect(string $name, string $label, array|Closure $options, Closure $loader): self
+    public static function multiselect(string $name, string $label, array|Closure $options, Closure $loader, ?string $relation = null, ?string $help = null): self
     {
-        return new self($name, $label, 'multiselect', ['nullable', 'array'], $options, null, [], $loader);
+        return new self($name, $label, 'multiselect', ['nullable', 'array'], $options, $help, [], $loader, $relation);
+    }
+
+    /** "Also shown in these pages" (HasPlacements); the record's own page field stays the main/canonical page. */
+    public static function placedPages(): self
+    {
+        return self::multiselect('placed_pages', 'نمایش در صفحه‌های دیگر', fn () => Options::pages(),
+            fn (Model $m) => $m->exists ? $m->placedPages()->pluck('pages.id')->all() : [], 'placedPages',
+            'هم‌زبان رکورد باشند. اگر رکورد آدرس خودش را دارد، این صفحه‌ها همان آدرس را با canonical به آدرس اصلی نشان می‌دهند.');
+    }
+
+    /** "Also in these categories" (HasExtraCategories). */
+    public static function extraCategories(CategoryType $type): self
+    {
+        return self::multiselect('extra_categories', 'دسته‌های دیگر', fn () => Options::categories($type),
+            fn (Model $m) => $m->exists ? $m->extraCategories()->pluck('categories.id')->all() : [], 'extraCategories', 'هم‌زبان رکورد باشند.');
     }
 
     public static function datetime(string $name, string $label, ?string $help = null): self

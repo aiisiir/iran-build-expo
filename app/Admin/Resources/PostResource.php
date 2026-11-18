@@ -45,8 +45,10 @@ class PostResource extends Resource
     {
         return [
             Field::select('language_id', 'زبان', fn () => Options::languages(), ['required', 'exists:languages,id']),
-            Field::select('page_id', 'صفحه (پیشوند آدرس)', fn () => Options::pages(), ['required', 'exists:pages,id'], null, 'آدرس خبر: /زبان/صفحه/خبر'),
-            Field::select('category_id', 'دسته', fn () => Options::categories(\App\Enums\CategoryType::Post), ['required', 'exists:categories,id']),
+            Field::select('page_id', 'صفحهٔ اصلی (آدرس و canonical)', fn () => Options::pages(), ['required', 'exists:pages,id'], null, 'آدرس اصلی خبر: /زبان/صفحه/خبر؛ بقیهٔ صفحه‌ها canonical می‌گیرند.'),
+            Field::placedPages(),
+            Field::select('category_id', 'دستهٔ اصلی', fn () => Options::categories(\App\Enums\CategoryType::Post), ['required', 'exists:categories,id']),
+            Field::extraCategories(\App\Enums\CategoryType::Post),
             Field::select('edition_id', 'دوره', fn () => Options::editions(), ['nullable', 'exists:editions,id']),
             Field::text('title', 'عنوان', ['required', 'string', 'max:191']),
             Field::text('slug', 'نشانی (slug)', ['nullable', 'string', 'max:160'], 'خالی = خودکار از عنوان'),

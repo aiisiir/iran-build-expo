@@ -36,7 +36,9 @@ class FaqResource extends Resource
     {
         return [
             Field::select('language_id', 'زبان', fn () => Options::languages(), ['required', 'exists:languages,id']),
-            Field::select('category_id', 'دسته', fn () => Options::categories(CategoryType::Faq), ['nullable', 'exists:categories,id']),
+            Field::placedPages(),
+            Field::select('category_id', 'دستهٔ اصلی', fn () => Options::categories(CategoryType::Faq), ['nullable', 'exists:categories,id']),
+            Field::extraCategories(CategoryType::Faq),
             Field::text('question', 'پرسش', ['required', 'string', 'max:300']),
             Field::rich('answer', 'پاسخ', ['required', 'string', 'max:50000']),
             Field::number('sort_order', 'ترتیب'),

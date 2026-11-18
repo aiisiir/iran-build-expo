@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LinkPlacement;
 use App\Models\Concerns\Audited;
+use App\Models\Concerns\HasPlacements;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(['language_id', 'placement', 'title', 'show_title', 'is_active', 'sort_order'])]
 class LinkGroup extends Model
 {
-    use Audited, SoftDeletes;
+    use Audited, HasPlacements, SoftDeletes;
 
     protected function casts(): array
     {

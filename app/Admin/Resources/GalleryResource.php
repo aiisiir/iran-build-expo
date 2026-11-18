@@ -29,6 +29,7 @@ class GalleryResource extends Resource
     {
         return [
             Field::select('language_id', 'زبان', fn () => Options::languages(), ['required', 'exists:languages,id']),
+            Field::placedPages(),
             Field::select('edition_id', 'دوره', fn () => Options::editions(), ['nullable', 'exists:editions,id']),
             Field::text('title', 'عنوان', ['required', 'string', 'max:191']),
             Field::textarea('description', 'توضیح'),
@@ -40,6 +41,11 @@ class GalleryResource extends Resource
     public function columns(): array
     {
         return ['عنوان' => 'title', 'ترتیب' => 'sort_order', 'فعال' => 'is_active'];
+    }
+
+    public function copyChildren(Model $from, Model $to): void
+    {
+        $to->items()->saveMany($from->items->map->replicate());
     }
 
     public function children(Model $model): array
