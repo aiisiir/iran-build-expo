@@ -12,6 +12,50 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// Page layout editor: drag a row by its grip, or use the arrows (also for keyboard users). Order is the DOM order of the rows.
+document.querySelectorAll('[data-sortable]').forEach((list) => {
+    let dragged = null;
+    list.querySelectorAll('[data-move-box]').forEach((box) => { box.hidden = false; });
+
+    list.addEventListener('dragstart', (event) => {
+        dragged = event.target.closest('[data-row]');
+        if (dragged) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', '');
+            event.dataTransfer.setDragImage(dragged, 0, 0);
+            dragged.classList.add('dragging');
+        }
+    });
+    list.addEventListener('dragover', (event) => {
+        if (!dragged) {
+            return;
+        }
+        event.preventDefault();
+        const next = [...list.querySelectorAll('[data-row]:not(.dragging)')].find((row) => {
+            const box = row.getBoundingClientRect();
+            return event.clientY < box.top + box.height / 2;
+        });
+        list.insertBefore(dragged, next || null);
+    });
+    list.addEventListener('dragend', () => {
+        dragged?.classList.remove('dragging');
+        dragged = null;
+    });
+    list.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-move]');
+        const row = button?.closest('[data-row]');
+        if (!row) {
+            return;
+        }
+        const up = Number(button.dataset.move) < 0;
+        const neighbour = up ? row.previousElementSibling : row.nextElementSibling;
+        if (neighbour) {
+            list.insertBefore(row, up ? neighbour : neighbour.nextElementSibling);
+            button.focus();
+        }
+    });
+});
+
 // Form tabs: the bar is hidden in the markup so the form still works without JavaScript.
 document.querySelectorAll('.form-tabs').forEach((bar) => {
     const tabs = [...bar.querySelectorAll('[role=tab]')];

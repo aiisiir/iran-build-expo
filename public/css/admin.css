@@ -68,6 +68,16 @@ code { background: #eef1f5; padding: .1rem .3rem; border-radius: 4px; }
 .tabs a[aria-current="page"] { background: #fff; color: var(--navy); font-weight: 700; border-color: var(--line); border-bottom-color: #fff; box-shadow: inset 0 3px 0 var(--accent); }
 .tabs + form fieldset { background: #fff; border: 1px solid var(--line); border-radius: 0 0 8px 8px; }
 
+/* Page layout editor */
+.layout-list { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .5rem; }
+.layout-row { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .5rem .8rem; }
+.layout-row.dragging { opacity: .4; }
+.layout-row .grip { cursor: grab; font-size: 1.3rem; color: #5b6570; user-select: none; }
+.layout-row .info { flex: 1; min-width: 200px; }
+.layout-row input[type=number] { width: 4.5rem; padding: .2rem .4rem; border: 1px solid #b8c0ca; border-radius: 6px; font: inherit; }
+.layout-list + .btn { position: sticky; bottom: 1rem; }
+.layout-row .row-links { display: flex; gap: .8rem; }
+
 /* Form tabs */
 .form-tabs { display: flex; flex-wrap: wrap; gap: .25rem; border-bottom: 2px solid var(--line); margin: 0 0 -.4rem; }
 .form-tabs button { margin-bottom: -2px; padding: .5rem 1rem; border: 2px solid transparent; border-radius: 8px 8px 0 0; background: none; font: inherit; color: #4a5563; cursor: pointer; }

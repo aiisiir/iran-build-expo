@@ -4,6 +4,7 @@ use App\Admin\Registry;
 use App\Http\Controllers\Admin\BadgeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
+use App\Http\Controllers\Admin\PageLayoutController;
 use App\Http\Controllers\Admin\MediaController;
 use App\Http\Controllers\Admin\ResourceController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -23,6 +24,9 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
 
     Route::post('logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/', DashboardController::class)->name('dashboard');
+
+    Route::get('pages/{id}/layout', [PageLayoutController::class, 'edit'])->whereNumber('id')->name('pages.layout');
+    Route::put('pages/{id}/layout', [PageLayoutController::class, 'update'])->whereNumber('id')->name('pages.layout.update');
 
     Route::get('trash', TrashController::class)->name('trash');
 

@@ -62,6 +62,7 @@ class PageResource extends Resource
     {
         return [
             'مشاهدهٔ صفحه' => PublicUrl::path($model->load('language')->path()),
+            'چینش بصری بلوک‌ها' => route('admin.pages.layout', $model->id),
             'بلوک‌های صفحه' => route('admin.resource.index', ['resource' => 'page-modules', 'page_id' => $model->id]),
         ];
     }
