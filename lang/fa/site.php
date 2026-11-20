@@ -13,6 +13,8 @@ return [
     'products' => 'محصولات',
     'prev' => 'قبلی',
     'next' => 'بعدی',
+    'previous' => 'قبلی',
+    'close' => 'بستن',
     'tour_unavailable' => 'تور مجازی در دسترس نیست.',
     'footer_nav' => 'پیوندهای پایین صفحه',
     'pagination' => 'صفحه‌بندی',

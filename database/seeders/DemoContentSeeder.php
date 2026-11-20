@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\PublishStatus;
 use App\Models\Category;
 use App\Models\Company;
+use App\Models\Edition;
 use App\Models\Faq;
 use App\Models\Gallery;
 use App\Models\Language;
@@ -34,6 +35,11 @@ class DemoContentSeeder extends Seeder
         }
 
         DB::transaction(function (): void {
+            // The badge form only opens while a "current" exhibition edition exists.
+            if (! Edition::current()) {
+                Edition::create(['code' => 'demo', 'name' => 'دورهٔ نمونه'])->claimFlag('is_current');
+            }
+
             $media = collect(range(1, 4))->map(fn ($i) => MediaAsset::create([
                 'kind' => 'image', 'path' => "demo/demo-{$i}.svg", 'original_name' => "demo-{$i}.svg", 'mime' => 'image/svg+xml',
                 'size' => (int) @filesize(public_path("uploads/demo/demo-{$i}.svg")), 'width' => 1600, 'height' => 900,

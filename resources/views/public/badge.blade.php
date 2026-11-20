@@ -8,7 +8,7 @@
         <p class="notice">{{ __('badge.closed') }}</p>
     @else
         <p>{{ __('badge.intro') }}</p>
-        <form class="badge-form" method="post" action="{{ route('public.badge.store', ['locale' => $language->code]) }}" enctype="multipart/form-data" novalidate>
+        <form class="badge-form" method="post" action="{{ route('public.badge.store', ['locale' => app('site.language')->code]) }}" enctype="multipart/form-data" novalidate>
             @csrf
             <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
             @foreach ([['full_name', 'text'], ['phone', 'tel'], ['email', 'email'], ['age', 'text'], ['address', 'text'], ['education_degree', 'text'], ['education_field', 'text'], ['activity_field', 'text']] as [$name, $type])

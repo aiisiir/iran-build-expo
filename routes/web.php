@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomAssetController;
 use App\Http\Controllers\Public\BadgeRegistrationController;
+use App\Http\Controllers\Public\GalleryController;
 use App\Http\Controllers\Public\ItemController;
 use App\Http\Controllers\Public\PageController;
 use App\Http\Controllers\Public\ProductController;
@@ -33,6 +34,7 @@ Route::middleware('throttle:public')->group(function () use ($stateless): void {
 
         Route::withoutMiddleware($stateless)->group(function (): void {
             Route::get('/', [PageController::class, 'home'])->name('public.home');
+            Route::get('gallery/{id}', [GalleryController::class, 'show'])->whereNumber('id')->name('public.gallery');
             Route::get('{page}', [PageController::class, 'show'])->name('public.page');
             Route::get('{page}/{item}', [ItemController::class, 'show'])->name('public.item');
             Route::get('{page}/{company}/{product}', [ProductController::class, 'show'])->name('public.product');

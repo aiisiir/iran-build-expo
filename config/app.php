@@ -57,6 +57,9 @@ return [
     // Master switch for search engines: set SITE_INDEXABLE=false in .env while the site is a draft/demo.
     'indexable' => (bool) env('SITE_INDEXABLE', true),
 
+    // Seeding switch: SEED_DEMO_CONTENT=true makes `php artisan db:seed` also load the sample site (see DemoContentSeeder).
+    'seed_demo' => (bool) env('SEED_DEMO_CONTENT', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

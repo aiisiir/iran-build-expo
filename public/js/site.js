@@ -83,3 +83,44 @@ document.querySelectorAll('[data-slider]').forEach((slider) => {
     slider.querySelector('[data-slide-prev]').addEventListener('click', () => step(rtl ? 1 : -1));
     slider.querySelector('[data-slide-next]').addEventListener('click', () => step(rtl ? -1 : 1));
 });
+
+// Gallery viewer: a modal <dialog> that grows out of the clicked picture; arrows, Esc, swipe-free and keyboard friendly.
+document.querySelectorAll('[data-lightbox]').forEach((grid) => {
+    const box = document.querySelector('dialog.lightbox');
+    if (!box || typeof box.showModal !== 'function') return; // the links still open the full image
+    const links = [...grid.querySelectorAll('a')];
+    const img = box.querySelector('img');
+    const caption = box.querySelector('figcaption');
+    const count = box.querySelector('.lb-count');
+    let current = 0; let opener = null;
+
+    const show = (index) => {
+        current = (index + links.length) % links.length;
+        const link = links[current];
+        img.src = link.href;
+        img.alt = link.querySelector('img')?.alt || '';
+        caption.textContent = link.dataset.caption || '';
+        count.textContent = `${current + 1} / ${links.length}`;
+    };
+    const open = (index, from) => {
+        opener = from; box.hidden = false; show(index); box.showModal();
+        requestAnimationFrame(() => box.classList.add('is-open'));
+    };
+    const close = () => {
+        box.classList.remove('is-open');
+        const done = () => { box.close(); box.hidden = true; opener?.focus(); };
+        reduced.matches ? done() : setTimeout(done, 240);
+    };
+
+    links.forEach((link, i) => link.addEventListener('click', (e) => { e.preventDefault(); open(i, link); }));
+    box.querySelector('[data-lb-prev]').addEventListener('click', () => show(current - 1));
+    box.querySelector('[data-lb-next]').addEventListener('click', () => show(current + 1));
+    box.querySelector('[data-lb-close]').addEventListener('click', close);
+    box.addEventListener('click', (e) => { if (e.target === box) close(); });
+    box.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
+    box.addEventListener('keydown', (e) => {
+        const rtl = getComputedStyle(box).direction === 'rtl';
+        if (e.key === 'ArrowLeft') show(current + (rtl ? 1 : -1));
+        if (e.key === 'ArrowRight') show(current + (rtl ? -1 : 1));
+    });
+});

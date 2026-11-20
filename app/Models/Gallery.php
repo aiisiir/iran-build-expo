@@ -25,6 +25,12 @@ class Gallery extends Model
         return $this->hasMany(GalleryItem::class)->orderBy('sort_order');
     }
 
+    /** Public page listing all images, e.g. /fa/gallery/3. */
+    public function path(): string
+    {
+        return "/{$this->language->code}/gallery/{$this->id}";
+    }
+
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class);

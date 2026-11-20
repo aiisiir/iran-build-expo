@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Gallery;
 use App\Models\Language;
 use App\Models\Page;
 use App\Models\Post;
@@ -42,6 +43,7 @@ class SeoController
             ->merge(Page::published()->where('noindex', false)->with('language')->get())
             ->merge(Post::live()->with(['language', 'page'])->get())
             ->merge(Company::where('is_active', true)->with(['language', 'page'])->get())
+            ->merge(Gallery::where('is_active', true)->has('items')->with('language')->get())
             ->filter(fn ($r) => $languages->has($r->language->code));
 
         // Group once (O(n)) instead of re-filtering the whole list per record.
