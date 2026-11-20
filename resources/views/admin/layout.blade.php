@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'پنل مدیریت') — {{ config('app.name') }}</title>
     <link rel="icon" href="{{ url('favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
@@ -26,7 +27,7 @@
         @endphp
         @foreach (\App\Admin\Registry::groups() as $group => $resources)
             <h2>{{ $group }}</h2>
-            @foreach (array_filter($resources, fn ($r) => ! $r->adminOnly || $isAdmin) as $r)
+            @foreach (array_filter($resources, fn ($r) => $r->allows(auth()->user())) as $r)
                 <a href="{{ route('admin.resource.index', ['resource' => $r->key()]) }}" @if (request()->route('resource')?->key() === $r->key()) aria-current="page" @endif>{{ $r->title() }}</a>
             @endforeach
             @foreach ($extra[$group] ?? [] as [$label, $pattern, $url])
@@ -47,6 +48,7 @@
         @yield('content')
     </main>
 </div>
+@include('admin.partials.media-picker')
 <script src="{{ asset('js/admin.js') }}" defer></script>
 @if (is_file(public_path('vendor/jodit/jodit.min.js')))
     <script src="{{ asset('vendor/jodit/jodit.min.js') }}" defer></script>

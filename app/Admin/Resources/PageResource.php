@@ -47,7 +47,7 @@ class PageResource extends Resource
             Field::datetime('published_at', 'زمان انتشار', 'خالی = همین حالا (برای زمان‌بندی، آیندهٔ نزدیک بگذارید)'),
             Field::text('meta_title', 'عنوان سئو', ['nullable', 'string', 'max:191']),
             Field::text('meta_description', 'توضیح سئو', ['nullable', 'string', 'max:300']),
-            Field::select('og_media_id', 'تصویر اشتراک‌گذاری', fn () => Options::media(\App\Enums\MediaKind::Image), ['nullable', 'exists:media_assets,id']),
+            Field::media('og_media_id', 'تصویر اشتراک‌گذاری', \App\Enums\MediaKind::Image, ['nullable', 'exists:media_assets,id']),
             Field::checkbox('noindex', 'نمایه نشود (noindex)', false),
             Field::rich('body', 'متن'),
         ];

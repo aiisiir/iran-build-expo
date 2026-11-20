@@ -40,7 +40,7 @@ class GalleryItemResource extends Resource
     {
         return [
             Field::select('gallery_id', 'گالری', fn () => Options::galleries(), ['required', 'exists:galleries,id']),
-            Field::select('media_id', 'تصویر', fn () => Options::media(MediaKind::Image), ['required', 'exists:media_assets,id']),
+            Field::media('media_id', 'تصویر', MediaKind::Image, ['required', 'exists:media_assets,id']),
             Field::text('caption', 'عنوان تصویر', ['nullable', 'string', 'max:191']),
             Field::number('sort_order', 'ترتیب'),
         ];

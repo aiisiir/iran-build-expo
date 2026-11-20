@@ -18,7 +18,7 @@ class AdminPagesSmokeTest extends TestCase
     {
         $this->seedLanguages();
         $this->seed(DemoContentSeeder::class);
-        $this->actingAs($this->admin());
+        $this->actingAs($this->superAdmin());
 
         foreach (['/admin', '/admin/trash', '/admin/media', '/admin/badges', '/admin/settings?language_id=1'] as $url) {
             $this->get($url)->assertOk();

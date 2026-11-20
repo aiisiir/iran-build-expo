@@ -56,8 +56,10 @@ class PageModuleResource extends Resource
             Field::select('category_id', 'دستهٔ خبر', fn () => Options::categories(), $optional('categories')),
             Field::select('link_group_id', 'گروه لینک', fn () => Options::linkGroups(), $optional('link_groups')),
             Field::select('gallery_id', 'گالری', fn () => Options::galleries(), $optional('galleries')),
-            Field::select('media_id', 'تصویر (بلوک متن)', fn () => Options::media(\App\Enums\MediaKind::Image), $optional('media_assets')),
+            Field::media('media_id', 'تصویر (بلوک متن)', \App\Enums\MediaKind::Image, ['nullable', 'exists:media_assets,id']),
             Field::rich('body', 'متن (بلوک متن)'),
+            Field::text('css_class', 'کلاس CSS اختصاصی', ['nullable', 'string', 'max:120', 'regex:/^[A-Za-z_][A-Za-z0-9_\- ]*$/'], 'چند کلاس با فاصله؛ برای استایل‌دهی در «استایل اختصاصی».'),
+            Field::text('css_id', 'شناسه (id) اختصاصی', ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z][A-Za-z0-9_\-]*$/'], 'یکتا در صفحه؛ برای لینک به همین بلوک (#id) یا استایل.'),
         ];
     }
 

@@ -10,7 +10,7 @@ final class Registry
     private const GROUPS = [
         'ساختار سایت و ماژول‌ها' => [R\PageResource::class, R\PageModuleResource::class, R\LinkGroupResource::class, R\LinkResource::class],
         'مدیریت داده‌ها' => [R\PostResource::class, R\CategoryResource::class, R\FaqResource::class, R\GalleryResource::class, R\GalleryItemResource::class, R\CompanyResource::class, R\ProductResource::class, R\ProductImageResource::class],
-        'سیستم' => [R\LanguageResource::class, R\EditionResource::class, R\UserResource::class, R\BadgeTypeResource::class, R\AuditEventResource::class],
+        'سیستم' => [R\LanguageResource::class, R\EditionResource::class, R\UserResource::class, R\BadgeTypeResource::class, R\AuditEventResource::class, R\CustomSnippetResource::class],
     ];
 
     /** @return array<string, list<Resource>> */

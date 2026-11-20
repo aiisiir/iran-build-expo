@@ -10,11 +10,14 @@
     @forelse ($rows as $row)
         <tr>
             <td><span class="tag">{{ $row['resource']->title() }}</span></td>
-            <td>{{ \App\Admin\Format::cell($row['title'] ?? '#'.$row['model']->id) }}</td>
+            <td>{{ $row['title'] }}</td>
             <td>{{ \App\Admin\Format::cell($row['model']->deleted_at) }}</td>
             <td class="actions">
                 <form method="post" action="{{ route('admin.resource.restore', ['resource' => $row['resource']->key(), 'id' => $row['model']->id]) }}">
                     @csrf <input type="hidden" name="from" value="trash"><button class="link" type="submit">بازیابی</button>
+                </form>
+                <form method="post" action="{{ route('admin.resource.purge', ['resource' => $row['resource']->key(), 'id' => $row['model']->id]) }}" data-confirm="این رکورد برای همیشه پاک شود؟ (قابل بازگشت نیست)">
+                    @csrf <button class="link danger" type="submit">حذف دائمی</button>
                 </form>
             </td>
         </tr>

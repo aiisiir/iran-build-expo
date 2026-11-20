@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomAssetController;
 use App\Http\Controllers\Public\BadgeRegistrationController;
 use App\Http\Controllers\Public\ItemController;
 use App\Http\Controllers\Public\PageController;
@@ -22,6 +23,7 @@ Route::middleware('throttle:public')->group(function () use ($stateless): void {
     Route::withoutMiddleware($stateless)->group(function (): void {
         Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
         Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+        Route::get('/assets/custom.{ext}', CustomAssetController::class)->where('ext', 'css|js')->name('custom.asset');
     });
 
     Route::prefix('{locale}')->where(['locale' => '[a-z]{2,3}'])->middleware('set-locale')->group(function () use ($stateless): void {

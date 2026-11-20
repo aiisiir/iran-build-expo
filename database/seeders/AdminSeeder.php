@@ -23,7 +23,7 @@ class AdminSeeder extends Seeder
         $generated = $password === '';
         $password = $generated ? Str::password(20, symbols: false) : $password;
 
-        User::create(['name' => 'Administrator', 'email' => $email, 'password' => $password, 'role' => Role::Admin, 'position' => 'مدیر سایت']);
+        User::create(['name' => 'Administrator', 'email' => $email, 'password' => $password, 'role' => Role::SuperAdmin, 'position' => 'مدیر سایت']);
 
         $this->command?->warn($generated ? "Admin created: {$email} / {$password}  (shown once, change it now)" : "Admin created: {$email}");
     }

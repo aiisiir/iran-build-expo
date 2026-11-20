@@ -33,6 +33,8 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
     Route::prefix('media')->name('media.')->controller(MediaController::class)->group(function (): void {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
+        Route::get('picker', 'picker')->name('picker');
+        Route::post('quick', 'quick')->name('quick');
         Route::get('{id}/edit', 'edit')->whereNumber('id')->name('edit');
         Route::put('{id}', 'update')->whereNumber('id')->name('update');
         Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
@@ -62,6 +64,7 @@ Route::middleware(['auth', 'auth.session', EnsureActiveUser::class])->group(func
         Route::put('{id}', 'update')->whereNumber('id')->name('update');
         Route::delete('{id}', 'destroy')->whereNumber('id')->name('destroy');
         Route::post('{id}/restore', 'restore')->whereNumber('id')->name('restore');
+        Route::post('{id}/purge', 'purge')->whereNumber('id')->name('purge');
         Route::post('{id}/replicate', 'replicate')->whereNumber('id')->name('replicate');
     });
 });

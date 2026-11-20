@@ -56,6 +56,124 @@ document.querySelectorAll('[data-sortable]').forEach((list) => {
     });
 });
 
+// Media picker: one shared <dialog>; a field opens it, a click on a thumbnail (or a fresh upload) fills the field.
+(() => {
+    const dialog = document.getElementById('media-picker');
+    if (!dialog) {
+        return;
+    }
+    const grid = dialog.querySelector('.picker-grid');
+    const search = dialog.querySelector('[name=q]');
+    const more = dialog.querySelector('[data-picker-more]');
+    const empty = dialog.querySelector('[data-picker-empty]');
+    const error = dialog.querySelector('[data-picker-error]');
+    const token = document.querySelector('meta[name=csrf-token]')?.content;
+    let field = null;
+    let page = 1;
+    let timer;
+
+    const tile = (asset) => {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.title = asset.name;
+        if (asset.image) {
+            const img = document.createElement('img');
+            img.src = asset.url;
+            img.alt = asset.alt || asset.name;
+            img.loading = 'lazy';
+            button.append(img);
+        } else {
+            button.textContent = asset.name;
+        }
+        button.addEventListener('click', () => choose(asset));
+        item.append(button);
+        return item;
+    };
+
+    const choose = (asset) => {
+        const preview = field.querySelector('[data-media-preview]');
+        field.querySelector('input[type=hidden]').value = asset.id;
+        if (asset.image) {
+            const img = document.createElement('img');
+            img.src = asset.url;
+            img.alt = asset.alt || '';
+            preview.replaceChildren(img);
+        } else {
+            preview.textContent = asset.name;
+        }
+        field.querySelector('[data-media-clear]').hidden = false;
+        dialog.close();
+    };
+
+    const load = async (reset) => {
+        if (reset) {
+            page = 1;
+            grid.replaceChildren();
+        }
+        const params = new URLSearchParams({ kind: field.dataset.kind || '', q: search.value, page });
+        const response = await fetch(`${dialog.dataset.list}?${params}`, { headers: { Accept: 'application/json' } });
+        const body = await response.json();
+        body.data.forEach((asset) => grid.append(tile(asset)));
+        more.hidden = !body.next;
+        empty.hidden = grid.children.length > 0;
+    };
+
+    const pane = (name) => {
+        dialog.querySelectorAll('[data-picker-tab]').forEach((tab) => tab.setAttribute('aria-selected', tab.dataset.pickerTab === name));
+        dialog.querySelectorAll('[data-picker-pane]').forEach((section) => { section.hidden = section.dataset.pickerPane !== name; });
+    };
+
+    document.addEventListener('click', (event) => {
+        const open = event.target.closest('[data-media-open]');
+        const clear = event.target.closest('[data-media-clear]');
+        if (open) {
+            field = open.closest('[data-media-field]');
+            search.value = '';
+            error.hidden = true;
+            pane('library');
+            dialog.showModal();
+            load(true);
+        } else if (clear) {
+            const box = clear.closest('[data-media-field]');
+            box.querySelector('input[type=hidden]').value = '';
+            box.querySelector('[data-media-preview]').textContent = 'چیزی انتخاب نشده';
+            clear.hidden = true;
+        }
+    });
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog || event.target.closest('[data-picker-close]')) {
+            dialog.close();
+        }
+        const tab = event.target.closest('[data-picker-tab]');
+        if (tab) {
+            pane(tab.dataset.pickerTab);
+        }
+    });
+    search.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => load(true), 250);
+    });
+    more.addEventListener('click', () => { page += 1; load(false); });
+
+    dialog.querySelector('[data-picker-upload]').addEventListener('click', async () => {
+        const file = dialog.querySelector('[name=file]');
+        const body = new FormData();
+        body.append('file', file.files[0] || '');
+        body.append('alt', dialog.querySelector('[name=alt]').value);
+        error.hidden = true;
+        const response = await fetch(dialog.dataset.upload, { method: 'POST', body, headers: { 'X-CSRF-TOKEN': token, Accept: 'application/json' } });
+        const result = await response.json();
+        if (response.ok) {
+            file.value = '';
+            choose(result);
+        } else {
+            error.textContent = Object.values(result.errors || {}).flat()[0] || 'بارگذاری ناموفق بود.';
+            error.hidden = false;
+        }
+    });
+})();
+
 // Form tabs: the bar is hidden in the markup so the form still works without JavaScript.
 document.querySelectorAll('.form-tabs').forEach((bar) => {
     const tabs = [...bar.querySelectorAll('[role=tab]')];

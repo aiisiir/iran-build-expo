@@ -40,12 +40,6 @@ final class Options
         return Edition::orderByDesc('id')->pluck('name', 'id')->all();
     }
 
-    public static function media(?MediaKind $kind = null): array
-    {
-        return MediaAsset::when($kind, fn ($q) => $q->where('kind', $kind))->latest('id')->limit(500)->get()
-            ->mapWithKeys(fn ($m) => [$m->id => "#{$m->id} {$m->original_name}"])->all();
-    }
-
     public static function linkGroups(): array
     {
         return LinkGroup::with('language')->orderBy('language_id')->get()
@@ -80,7 +74,7 @@ final class Options
 
     public static function roles(): array
     {
-        return ['admin' => 'مدیر', 'editor' => 'ویراستار'];
+        return ['superadmin' => 'مدیر ارشد (superadmin)', 'admin' => 'مدیر', 'editor' => 'ویراستار'];
     }
 
     public static function categoryTypes(): array

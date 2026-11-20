@@ -9,14 +9,16 @@
 </div>
 <div class="table-wrap">
 <table>
-    <thead><tr>@foreach ($resource->columns() as $header => $path)<th>{{ $header }}</th>@endforeach @unless ($resource->readOnly)<th></th>@endunless</tr></thead>
+    <thead><tr>@if ($thumbs)<th></th>@endif @foreach ($resource->columns() as $header => $path)<th>{{ $header }}</th>@endforeach @unless ($resource->readOnly)<th></th>@endunless</tr></thead>
     <tbody>
     @forelse ($rows as $row)
         <tr>
+            @if ($thumbs)<td class="thumb-cell">@include('admin.partials.thumb', ['asset' => $thumbs[$row->id] ?? null])</td>@endif
             @foreach ($resource->columns() as $path)<td>{{ \App\Admin\Format::cell(data_get($row, $path)) }}</td>@endforeach
             @unless ($resource->readOnly)
                 <td class="actions">
                     <a href="{{ route('admin.resource.edit', ['resource' => $resource->key(), 'id' => $row->id]) }}">ویرایش</a>
+                    @if ($url = $resource->viewUrl($row))<a href="{{ $url }}" target="_blank" rel="noopener">مشاهده</a>@endif
                     @if ($resource->copyable)
                         <form method="post" action="{{ route('admin.resource.replicate', ['resource' => $resource->key(), 'id' => $row->id]) }}">
                             @csrf <button class="link" type="submit">کپی</button>
@@ -31,7 +33,7 @@
             @endunless
         </tr>
     @empty
-        <tr><td colspan="{{ count($resource->columns()) + 1 }}">موردی وجود ندارد.</td></tr>
+        <tr><td colspan="{{ count($resource->columns()) + 2 }}">موردی وجود ندارد.</td></tr>
     @endforelse
     </tbody>
 </table>

@@ -14,6 +14,9 @@ abstract class Resource
 {
     public bool $adminOnly = false;
 
+    /** Only superadmins see and use it (custom code). Implies adminOnly. */
+    public bool $superOnly = false;
+
     public bool $readOnly = false;
 
     /** Show the "copy" action; off for records with a unique identity (languages, users…). */
@@ -24,6 +27,11 @@ abstract class Resource
 
     /** Form fields that are not columns of the model (handled in afterSave). */
     public array $virtual = [];
+
+    public function allows(\App\Models\User $user): bool
+    {
+        return (! $this->superOnly || $user->isSuper()) && (! $this->adminOnly || $user->isAdmin());
+    }
 
     /** @return class-string<Model> */
     abstract public function model(): string;
@@ -65,6 +73,42 @@ abstract class Resource
     public function hasTrash(): bool
     {
         return in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model()), true);
+    }
+
+    /** Short label of a row, for side lists and the trash: the first "name-like" column. */
+    public function rowTitle(Model $model): string
+    {
+        $paths = array_filter($this->columns(), 'is_string');
+        $path = collect($paths)->first(fn ($p) => in_array($p, ['title', 'name', 'label', 'question', 'caption', 'code', 'full_name'], true)) ?? array_values($paths)[0] ?? 'id';
+
+        return Format::cell(data_get($model, $path));
+    }
+
+    /** Small image per row (first of image_id, logo_id, media_id…), loaded in one query: [row id => MediaAsset]. */
+    public function thumbnails(\Illuminate\Support\Collection $rows): array
+    {
+        $column = collect(['image_id', 'logo_id', 'media_id', 'icon_media_id', 'og_media_id'])
+            ->first(fn ($c) => in_array($c, (new ($this->model()))->getFillable(), true));
+
+        if (! $column) {
+            return [];
+        }
+
+        $assets = \App\Models\MediaAsset::whereIn('id', $rows->pluck($column)->filter())->get()->keyBy('id');
+
+        return $rows->mapWithKeys(fn ($row) => [$row->id => $assets->get($row->{$column})])->filter()->all();
+    }
+
+    /** Public address of the record (for the "view" link), when it has one. */
+    public function viewUrl(Model $model): ?string
+    {
+        if (! method_exists($model, 'path')) {
+            return null;
+        }
+
+        $model->loadMissing(array_filter(['language', 'page'], fn ($r) => method_exists($model, $r)));
+
+        return \App\Support\PublicUrl::path($model->path());
     }
 
     /** Cross-field validation; throw ValidationException on failure. */

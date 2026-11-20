@@ -40,7 +40,7 @@ class ProductImageResource extends Resource
     {
         return [
             Field::select('product_id', 'محصول', fn () => Options::products(), ['required', 'exists:products,id']),
-            Field::select('media_id', 'تصویر', fn () => Options::media(MediaKind::Image), ['required', 'exists:media_assets,id']),
+            Field::media('media_id', 'تصویر', MediaKind::Image, ['required', 'exists:media_assets,id']),
             Field::number('sort_order', 'ترتیب'),
         ];
     }

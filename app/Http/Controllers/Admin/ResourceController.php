@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Admin\Resource;
+use App\Models\MediaAsset;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -24,9 +26,12 @@ class ResourceController
             }
         }
 
+        $rows = $query->paginate(25)->withQueryString();
+
         return view('admin.resource.index', [
             'resource' => $res,
-            'rows' => $query->paginate(25)->withQueryString(),
+            'rows' => $rows,
+            'thumbs' => $res->thumbnails($rows->getCollection()),
             'filters' => $request->only($res->filters()),
         ]);
     }
@@ -36,7 +41,7 @@ class ResourceController
         $res = $this->authorize($request, $resource, writable: true);
         $model = (new ($res->model()))->forceFill($request->only($res->filters()));
 
-        return view('admin.resource.form', ['resource' => $res, 'model' => $model]);
+        return view('admin.resource.form', ['resource' => $res, 'model' => $model] + $this->recent($res));
     }
 
     public function store(Request $request, Resource $resource): RedirectResponse
@@ -51,7 +56,7 @@ class ResourceController
     {
         $res = $this->authorize($request, $resource, writable: true);
 
-        return view('admin.resource.form', ['resource' => $res, 'model' => $res->model()::query()->findOrFail($id)]);
+        return view('admin.resource.form', ['resource' => $res, 'model' => $res->model()::query()->findOrFail($id)] + $this->recent($res));
     }
 
     public function update(Request $request, Resource $resource, int $id): RedirectResponse
@@ -82,6 +87,26 @@ class ResourceController
         return $request->input('from') === 'trash'
             ? redirect()->route('admin.trash')->with('status', 'بازیابی شد.')
             : $this->back($res, $model, 'بازیابی شد.');
+    }
+
+    /** Permanent delete of a record that is already in the trash; files uploaded from its form go with it when nothing else uses them. */
+    public function purge(Request $request, Resource $resource, int $id): RedirectResponse
+    {
+        $res = $this->authorize($request, $resource, writable: true);
+        abort_unless($res->hasTrash(), 404);
+        $model = $res->model()::onlyTrashed()->findOrFail($id);
+        $table = $model->getTable();
+        $mediaIds = collect(MediaAsset::REFERENCES[$table] ?? [])->map(fn ($column) => $model->{$column})->filter();
+
+        try {
+            DB::transaction(fn () => $model->forceDelete());
+        } catch (QueryException) {
+            return redirect()->route('admin.trash')->with('status', 'این رکورد هنوز زیرمجموعه دارد؛ ابتدا زیرمجموعه‌ها را حذف دائمی کنید.');
+        }
+
+        MediaAsset::whereIn('id', $mediaIds)->get()->each->deleteIfOrphan();
+
+        return redirect()->route('admin.trash')->with('status', 'برای همیشه حذف شد.');
     }
 
     /** Duplicate a record with all its settings (extra pages/categories, child rows) as a draft, then open it for editing. */
@@ -116,10 +141,18 @@ class ResourceController
             ->with('status', 'کپی ساخته شد؛ عنوان و آدرس را بازبینی کنید.');
     }
 
+    /** The latest records of the same type, shown beside the form so one can jump, copy or delete without leaving it. */
+    private function recent(Resource $res): array
+    {
+        $rows = $res->model()::query()->with($res->with())->latest('id')->limit(30)->get();
+
+        return ['recent' => $rows, 'recentThumbs' => $res->thumbnails($rows)];
+    }
+
     private function authorize(Request $request, Resource $res, bool $writable = false): Resource
     {
         abort_if($writable && $res->readOnly, 404);
-        abort_if($res->adminOnly && ! $request->user()->isAdmin(), 403);
+        abort_unless($res->allows($request->user()), 403);
 
         return $res;
     }

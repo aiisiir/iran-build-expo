@@ -3,15 +3,20 @@
 @section('content')
 <div class="head">
     <h1>{{ $model->exists ? 'ویرایش' : 'افزودن' }} — {{ $resource->title() }}</h1>
-    <a href="{{ route('admin.resource.index', ['resource' => $resource->key()]) }}">بازگشت به فهرست</a>
+    <span class="head-actions">
+        <a href="{{ route('admin.resource.index', ['resource' => $resource->key()]) }}">بازگشت به فهرست</a>
+        <button class="btn" type="submit" form="record-form">ذخیره</button>
+    </span>
 </div>
+<div class="split">
+<div class="split-main">
 @if ($model->exists)
     <p class="children">@foreach ($resource->children($model) as $label => $url)<a class="btn ghost" href="{{ $url }}" @if (str_starts_with($url, '/') && ! str_starts_with($url, '/admin')) target="_blank" rel="noopener" @endif>{{ $label }}</a>@endforeach</p>
 @endif
 @if ($model->exists && $resource->outlineView())
     @include($resource->outlineView(), ['model' => $model])
 @endif
-<form class="form" method="post" enctype="multipart/form-data"
+<form class="form" id="record-form" method="post" enctype="multipart/form-data"
       action="{{ $model->exists ? route('admin.resource.update', ['resource' => $resource->key(), 'id' => $model->id]) : route('admin.resource.store', ['resource' => $resource->key()]) }}">
     @csrf
     @if ($model->exists) @method('PUT') @endif
@@ -36,6 +41,12 @@
             @endforeach
         </div>
     @endforeach
-    <button class="btn" type="submit">ذخیره</button>
+    <div class="form-actions">
+        <button class="btn" type="submit">ذخیره</button>
+        <a href="{{ route('admin.resource.index', ['resource' => $resource->key()]) }}">بازگشت به فهرست</a>
+    </div>
 </form>
+</div>
+@include('admin.partials.record-list')
+</div>
 @endsection

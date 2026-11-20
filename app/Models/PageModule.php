@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['page_id', 'type', 'title', 'show_title', 'is_active', 'sort_order', 'display', 'item_limit', 'source_page_id', 'category_id', 'link_group_id', 'gallery_id', 'media_id', 'body'])]
+#[Fillable(['page_id', 'type', 'title', 'show_title', 'is_active', 'sort_order', 'display', 'item_limit', 'source_page_id', 'category_id', 'link_group_id', 'gallery_id', 'media_id', 'body', 'css_class', 'css_id'])]
 class PageModule extends Model
 {
     use Audited, SoftDeletes;

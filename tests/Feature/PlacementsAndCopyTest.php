@@ -102,6 +102,6 @@ class PlacementsAndCopyTest extends TestCase
         $this->actingAs($this->admin());
 
         $this->get("/admin/r/posts/{$post->id}/edit")->assertOk()
-            ->assertSee('role="tablist"', false)->assertSee('سئو')->assertSee('تصاویر و فایل‌ها')->assertSee('صفحه، دسته و زبان');
+            ->assertSee('role="tablist"', false)->assertSee('سئو')->assertSee('تصاویر و فایل‌ها')->assertSee('دسته‌بندی، صفحه و زبان');
     }
 }

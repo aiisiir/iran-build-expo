@@ -13,12 +13,10 @@ class TrashController
 
     public function __invoke(Request $request): View
     {
-        $isAdmin = $request->user()->isAdmin();
-
         $rows = collect(Registry::groups())->flatten()
-            ->filter(fn ($r) => $r->hasTrash() && ! $r->readOnly && ($isAdmin || ! $r->adminOnly))
+            ->filter(fn ($r) => $r->hasTrash() && ! $r->readOnly && $r->allows($request->user()))
             ->flatMap(fn ($r) => $r->model()::onlyTrashed()->with($r->with())->latest('deleted_at')->limit(self::LIMIT)->get()
-                ->map(fn ($m) => ['resource' => $r, 'model' => $m, 'title' => is_string($path = array_values($r->columns())[0]) ? data_get($m, $path) : null]))
+                ->map(fn ($m) => ['resource' => $r, 'model' => $m, 'title' => $r->rowTitle($m)]))
             ->sortByDesc(fn ($row) => $row['model']->deleted_at)->values();
 
         return view('admin.trash', ['rows' => $rows->take(self::LIMIT), 'more' => $rows->count() > self::LIMIT]);

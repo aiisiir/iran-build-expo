@@ -29,6 +29,18 @@
                         <option value="{{ $optValue }}" @selected(in_array($optValue, (array) $value))>{{ $optLabel }}</option>
                     @endforeach
                 </select> @break
+            @case('media')
+                @php $asset = $value ? \App\Models\MediaAsset::find($value) : null; @endphp
+                <div class="media-field" data-media-field data-kind="{{ $field->mediaKind()?->value }}">
+                    <input type="hidden" id="f-{{ $name }}" name="{{ $name }}" value="{{ $value }}">
+                    <span class="media-preview" data-media-preview>
+                        @if ($asset?->kind === \App\Enums\MediaKind::Image)<img src="{{ $asset->url() }}" alt="{{ $asset->alt }}">
+                        @elseif ($asset)<span>{{ $asset->original_name }}</span>
+                        @else<span class="muted">چیزی انتخاب نشده</span>@endif
+                    </span>
+                    <button type="button" class="btn ghost" data-media-open>انتخاب یا بارگذاری</button>
+                    <button type="button" class="link danger" data-media-clear @if (! $asset) hidden @endif>برداشتن</button>
+                </div> @break
             @case('datetime')
                 <input id="f-{{ $name }}" type="datetime-local" name="{{ $name }}" value="{{ $value }}" dir="ltr"> @break
             @case('date')

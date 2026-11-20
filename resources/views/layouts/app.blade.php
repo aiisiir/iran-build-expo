@@ -9,7 +9,10 @@
     <link rel="apple-touch-icon" href="{{ url('apple-touch-icon.png') }}">
     <meta name="theme-color" content="#F5EFE2">
     <link rel="stylesheet" href="{{ asset('css/site.css') }}?v={{ filemtime(public_path('css/site.css')) }}">
+    @php($custom = \App\Models\CustomSnippet::bundles())
+    @if ($custom['css'])<link rel="stylesheet" href="{{ route('custom.asset', 'css') }}?v={{ $custom['css']['version'] }}">@endif
     <script src="{{ asset('js/site.js') }}?v={{ filemtime(public_path('js/site.js')) }}" defer></script>
+    @if ($custom['js'])<script src="{{ route('custom.asset', 'js') }}?v={{ $custom['js']['version'] }}" defer></script>@endif
 </head>
 <body class="lang-{{ $language->code }}">
     <a class="skip-link" href="#main-content">{{ __('site.skip') }}</a>

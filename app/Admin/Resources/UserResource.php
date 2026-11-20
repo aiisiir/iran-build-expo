@@ -37,7 +37,7 @@ class UserResource extends Resource
             Field::text('name', 'نام', ['required', 'string', 'max:120']),
             Field::text('email', 'ایمیل', ['required', 'email', 'max:191', Rule::unique('users', 'email')->ignore($model?->id)]),
             Field::password('password', 'رمز عبور', ! $model?->exists),
-            Field::select('role', 'نقش', Options::roles(), ['required', 'in:admin,editor']),
+            Field::select('role', 'نقش', Options::roles(), ['required', 'in:superadmin,admin,editor']),
             Field::text('position', 'سمت (فقط نمایشی)', ['nullable', 'string', 'max:100']),
             Field::checkbox('is_active', 'فعال'),
         ];
@@ -51,10 +51,17 @@ class UserResource extends Resource
     /** The panel must always keep at least one active admin, or nobody can log in to fix it. */
     public function check(array $data, ?Model $model): void
     {
-        $demoted = ($data['role'] ?? null) !== 'admin' || ! ($data['is_active'] ?? false);
+        $actor = auth()->user();
+
+        // Only a superadmin may hand out or change the superadmin role.
+        if (! $actor->isSuper() && (($data['role'] ?? null) === 'superadmin' || $model?->isSuper())) {
+            throw ValidationException::withMessages(['role' => 'فقط مدیر ارشد می‌تواند نقش مدیر ارشد را تعیین یا تغییر دهد.']);
+        }
+
+        $demoted = ! in_array($data['role'] ?? null, ['admin', 'superadmin'], true) || ! ($data['is_active'] ?? false);
 
         if ($model?->exists && $model->isAdmin() && $model->is_active && $demoted
-            && ! User::where('role', 'admin')->where('is_active', true)->whereKeyNot($model->id)->exists()) {
+            && ! User::whereIn('role', ['admin', 'superadmin'])->where('is_active', true)->whereKeyNot($model->id)->exists()) {
             throw ValidationException::withMessages(['role' => 'حداقل یک مدیر فعال باید باقی بماند.']);
         }
     }

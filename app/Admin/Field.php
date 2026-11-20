@@ -3,6 +3,8 @@
 namespace App\Admin;
 
 use App\Enums\CategoryType;
+use App\Enums\MediaKind;
+use Illuminate\Validation\Rule;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,9 +12,11 @@ use Illuminate\Database\Eloquent\Model;
 final class Field
 {
     /** Form tabs in display order: key => label. */
-    public const TABS = ['general' => 'عمومی', 'place' => 'صفحه، دسته و زبان', 'content' => 'محتوا', 'media' => 'تصاویر و فایل‌ها', 'publish' => 'انتشار', 'seo' => 'سئو'];
+    public const TABS = ['general' => 'عمومی', 'place' => 'دسته‌بندی، صفحه و زبان', 'media' => 'تصاویر و فایل‌ها', 'publish' => 'انتشار', 'seo' => 'سئو', 'advanced' => 'پیشرفته'];
 
     private ?string $tab = null;
+
+    private ?MediaKind $kind = null;
 
     private function __construct(
         public readonly string $name,
@@ -37,10 +41,10 @@ final class Field
     public function tab(): string
     {
         return $this->tab ?? match (true) {
-            $this->type === 'rich' => 'content',
-            (bool) preg_match('/^(language_id|translation_key|page_id|source_page_id|.*category.*|placed_pages)$/', $this->name) => 'place',
-            (bool) preg_match('/(image|media|logo|icon|file|photo)/', $this->name) => 'media',
             (bool) preg_match('/^(meta_|og_|noindex)/', $this->name) => 'seo',
+            (bool) preg_match('/^css_/', $this->name) => 'advanced',
+            (bool) preg_match('/^(language_id|translation_key|page_id|source_page_id|placed_pages)$|categor/', $this->name) => 'place',
+            (bool) preg_match('/(image|media|logo|icon|file|photo)/', $this->name) => 'media',
             (bool) preg_match('/^(status|published_at|expires_at|is_active|is_featured|sort_order|show_|edition)/', $this->name) => 'publish',
             default => 'general',
         };
@@ -76,6 +80,21 @@ final class Field
         $default ??= $name === 'language_id' ? \App\Models\Language::default()?->id : null; // forms start on the default language
 
         return new self($name, $label, 'select', $rules, $options, $help, $default);
+    }
+
+    /** Picture/file chosen in a popup (search, thumbnails, upload); stores a media_assets id. */
+    public static function media(string $name, string $label, ?MediaKind $kind, array $rules, ?string $help = null): self
+    {
+        $exists = Rule::exists('media_assets', 'id')->whereNull('deleted_at')->when($kind, fn ($r) => $r->where('kind', $kind->value));
+        $field = new self($name, $label, 'media', array_map(fn ($r) => $r === 'exists:media_assets,id' ? $exists : $r, $rules), null, $help);
+        $field->kind = $kind;
+
+        return $field;
+    }
+
+    public function mediaKind(): ?MediaKind
+    {
+        return $this->kind;
     }
 
     public static function multiselect(string $name, string $label, array|Closure $options, Closure $loader, ?string $relation = null, ?string $help = null): self

@@ -43,7 +43,7 @@ class CompanyResource extends Resource
             Field::text('name', 'نام شرکت', ['required', 'string', 'max:191']),
             Field::text('slug', 'نشانی (slug)', ['nullable', 'string', 'max:160'], 'خالی = خودکار از نام'),
             Field::text('translation_key', 'کلید ترجمه', ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]+$/']),
-            Field::select('logo_id', 'لوگو', fn () => Options::media(MediaKind::Image), ['nullable', 'exists:media_assets,id']),
+            Field::media('logo_id', 'لوگو', MediaKind::Image, ['nullable', 'exists:media_assets,id']),
             Field::text('industry', 'حوزهٔ فعالیت (نشان گوشه)', ['nullable', 'string', 'max:120']),
             Field::multiselect('edition_ids', 'دوره‌های حضور', fn () => Options::editions(), fn (Model $m) => $m->exists ? $m->editions()->pluck('editions.id')->all() : []),
             Field::text('meta_title', 'عنوان سئو', ['nullable', 'string', 'max:191']),

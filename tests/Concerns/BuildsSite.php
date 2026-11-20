@@ -52,6 +52,11 @@ trait BuildsSite
         return User::create($overrides + ['name' => 'Admin', 'email' => 'admin@test.test', 'password' => 'secret1', 'role' => 'admin']);
     }
 
+    protected function superAdmin(): User
+    {
+        return User::create(['name' => 'Super', 'email' => 'super@test.test', 'password' => 'secret1', 'role' => 'superadmin']);
+    }
+
     protected function editor(): User
     {
         return User::create(['name' => 'Editor', 'email' => 'editor@test.test', 'password' => 'secret1', 'role' => 'editor']);
