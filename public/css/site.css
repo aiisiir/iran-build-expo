@@ -126,18 +126,21 @@ body:not(.lang-fa) .brand-name { text-transform: uppercase; letter-spacing: .08e
 .hero-controls[hidden] { display: none; }
 .ctl { width: 44px; height: 44px; border: 1px solid var(--cream-200); border-radius: 50%; background: rgb(10 24 48 / .88); color: var(--cream-100); font: inherit; font-size: 1.3rem; line-height: 1; cursor: pointer; display: grid; place-items: center; transition: background-color .2s, color .2s; }
 .ctl:hover { background: var(--cream-100); color: var(--navy-900); }
-[dir="rtl"] .hero-controls .ctl:not([data-hero-toggle]) span { display: inline-block; scale: -1 1; }
+[dir="rtl"] .hero-controls .ctl span { display: inline-block; scale: -1 1; }
 .hero-count { min-width: 3.4rem; text-align: center; font-variant-numeric: tabular-nums; background: rgb(10 24 48 / .88); padding: .15rem .6rem; border-radius: 999px; font-size: .9rem; }
 
 /* ---------- home sections ---------- */
 .section { padding-block: clamp(2.5rem, 6vw, var(--space-5)); }
 .section-title, .section h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin: 0 0 1.4rem; display: flex; align-items: center; gap: .9rem; }
 .section-title::before, .section h2::before { content: ""; width: 14px; height: 14px; flex: none; background: var(--gold-500); transform: rotate(45deg); }
-.pillars { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-.pillar { position: relative; padding: 1.6rem 1.4rem 1.4rem; background: var(--surface); border: 1px solid var(--cream-300); border-top: 4px solid var(--navy-900); border-radius: var(--radius); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
-.pillar:hover { transform: translateY(-4px); box-shadow: var(--shadow-1); }
-.pillar-no { display: block; color: var(--gold-700); font-weight: 800; font-size: 1.1rem; margin-bottom: .4rem; }
-.pillar h3 { font-size: 1.2rem; } .pillar p { margin: 0; color: var(--muted); }
+/* "pillars" content block: an <ol> of <h3>+<p> items, numbered by CSS (Persian digits in fa) */
+.pillars-block .prose { max-width: none; }
+.pillars-block .prose ol { list-style: none; counter-reset: pillar; margin: 0; padding: 0; display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.pillars-block .prose li { counter-increment: pillar; margin: 0; padding: 1.6rem 1.4rem 1.4rem; background: var(--surface); border: 1px solid var(--cream-300); border-top: 4px solid var(--navy-900); border-radius: var(--radius); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+.pillars-block .prose li:hover { transform: translateY(-4px); box-shadow: var(--shadow-1); }
+.pillars-block .prose li::before { content: counter(pillar); display: block; color: var(--gold-700); font-weight: 800; font-size: 1.1rem; margin-bottom: .4rem; }
+.lang-fa .pillars-block .prose li::before { content: counter(pillar, persian); }
+.pillars-block .prose h3 { font-size: 1.2rem; margin: 0 0 .4rem; } .pillars-block .prose p { margin: 0; color: var(--muted); }
 
 .atmosphere { position: relative; isolation: isolate; overflow: hidden; background: var(--navy-950); color: var(--cream-100); padding-block: clamp(4rem, 12vw, 9rem); margin-top: var(--space-4); }
 .atmosphere-media { position: absolute; inset: -8% 0; z-index: -1; }
@@ -147,7 +150,6 @@ body:not(.lang-fa) .brand-name { text-transform: uppercase; letter-spacing: .08e
 .atmosphere h2 { color: var(--cream-50); font-size: clamp(1.8rem, 4.5vw, 3rem); }
 .atmosphere h2::before { background: var(--gold-300); }
 .atmosphere p { color: var(--cream-200); font-size: 1.15rem; margin: 0 0 1.5rem; }
-.atmosphere .btn[hidden] { display: none; }
 
 /* scroll-driven parallax and reveals: progressive enhancement only, content is visible without them */
 @supports (animation-timeline: view()) {
@@ -253,7 +255,7 @@ main:has(> article > .atmosphere:last-child) { padding-bottom: 0; } /* the dark 
 .site-footer strong { color: var(--cream-50); display: block; margin-bottom: .4rem; }
 .footer-brand { display: flex; align-items: center; gap: .7rem; margin: 0 0 .8rem; }
 .footer-brand strong { margin: 0; font-size: 1.1rem; }
-.footer-symbol { width: 44px; height: 44px; color: var(--cream-100); }
+.footer-symbol { width: 44px; height: 44px; padding: 4px; background: var(--cream-100); border-radius: 8px; object-fit: contain; }
 .site-footer .symbol-key { fill: var(--gold-300); }
 .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2.5rem; }
 .footer-grid p { margin: .2rem 0; }

@@ -18,16 +18,14 @@ if (sentinel && bar && 'IntersectionObserver' in window) {
     new IntersectionObserver(([entry]) => bar.classList.toggle('is-scrolled', !entry.isIntersecting)).observe(sentinel);
 }
 
-// Hero carousel: autoplay only when motion is allowed; always pausable; pauses while focused or hovered.
+// Hero carousel: autoplay only when motion is allowed; stops while hovered, focused or in a hidden tab; prev/next and arrow keys always work.
 document.querySelectorAll('[data-hero]').forEach((hero) => {
     const slides = [...hero.querySelectorAll('.hero-slide')];
     const controls = hero.querySelector('[data-hero-controls]');
     if (slides.length < 2 || !controls) return;
-    const toggle = hero.querySelector('[data-hero-toggle]');
-    const icon = hero.querySelector('[data-hero-icon]');
     const counter = hero.querySelector('[data-hero-current]');
     const list = hero.querySelector('.hero-slides');
-    let index = 0; let timer = null; let userPaused = reduced.matches;
+    let index = 0; let timer = null;
 
     const show = (i) => {
         index = (i + slides.length) % slides.length;
@@ -35,17 +33,12 @@ document.querySelectorAll('[data-hero]').forEach((hero) => {
         counter.textContent = new Intl.NumberFormat(document.documentElement.lang).format(index + 1);
     };
     const stop = () => { clearInterval(timer); timer = null; list.setAttribute('aria-live', 'polite'); };
-    const start = () => { if (userPaused || timer) return; list.setAttribute('aria-live', 'off'); timer = setInterval(() => show(index + 1), 7000); };
-    const render = () => {
-        icon.textContent = userPaused ? '▶' : '❚❚';
-        toggle.setAttribute('aria-label', toggle.dataset[userPaused ? 'labelPlay' : 'labelPause']);
-    };
+    const start = () => { if (reduced.matches || timer) return; list.setAttribute('aria-live', 'off'); timer = setInterval(() => show(index + 1), 7000); };
 
     controls.hidden = false;
-    show(0); render(); start();
+    show(0); start();
     hero.querySelector('[data-hero-prev]').addEventListener('click', () => { show(index - 1); });
     hero.querySelector('[data-hero-next]').addEventListener('click', () => { show(index + 1); });
-    toggle.addEventListener('click', () => { userPaused = !userPaused; userPaused ? stop() : start(); render(); });
     hero.addEventListener('mouseenter', stop); hero.addEventListener('mouseleave', start);
     hero.addEventListener('focusin', stop); hero.addEventListener('focusout', start);
     hero.addEventListener('keydown', (e) => {
@@ -56,19 +49,12 @@ document.querySelectorAll('[data-hero]').forEach((hero) => {
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
 });
 
-// Background video: plays only while visible, never with reduced motion or data saver, always pausable.
+// Background video: muted and decorative; plays only while visible, never with reduced motion or data saver (the poster stays).
 document.querySelectorAll('[data-atmosphere]').forEach((section) => {
     const video = section.querySelector('[data-atmosphere-video]');
-    const button = section.querySelector('[data-atmosphere-toggle]');
-    if (!video || !button || reduced.matches || navigator.connection?.saveData) return;
-    let paused = false; let visible = false;
-    const sync = () => {
-        const play = visible && !paused && !document.hidden;
-        play ? video.play().catch(() => {}) : video.pause();
-        button.textContent = button.dataset[paused ? 'labelPlay' : 'labelPause'];
-    };
-    button.hidden = false;
-    button.addEventListener('click', () => { paused = !paused; sync(); });
+    if (!video || reduced.matches || navigator.connection?.saveData) return;
+    let visible = false;
+    const sync = () => (visible && !document.hidden ? video.play().catch(() => {}) : video.pause());
     new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0.15 }).observe(section);
     document.addEventListener('visibilitychange', sync);
 });

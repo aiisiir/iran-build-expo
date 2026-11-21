@@ -68,14 +68,13 @@ class PublicHomeSeoTest extends TestCase
         $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /');
     }
 
-    public function test_fallback_home_has_exactly_four_hero_slides_and_a_prioritised_first_image(): void
+    public function test_home_without_records_shows_no_built_in_content(): void
     {
         $html = $this->get('/en')->assertOk()->getContent();
 
-        $this->assertSame(4, substr_count($html, 'aria-roledescription="slide"'));
-        $this->assertSame(1, substr_count($html, 'fetchpriority="high"'));
-        $this->assertMatchesRegularExpression('/<img class="hero-image"[^>]*fetchpriority="high"/', $html);
-        $this->assertStringNotContainsString('class="btn btn-gold"', $html); // no destination, no call to action
+        $this->assertStringNotContainsString('aria-roledescription="slide"', $html);
+        $this->assertStringNotContainsString('data-atmosphere', $html);
+        $this->assertSame(1, substr_count($html, '<h1'));
     }
 
     public function test_hero_module_posts_become_slides_with_a_call_to_action(): void
@@ -91,13 +90,18 @@ class PublicHomeSeoTest extends TestCase
             ->assertDontSee('class="section module module-posts"', false);
     }
 
-    public function test_home_has_a_single_h1_and_a_video_section_with_a_poster(): void
+    public function test_video_band_comes_from_settings_and_has_no_stop_button(): void
     {
+        $home = $this->makePage('fa', ['title' => 'خانه']);
+        $home->claimFlag('is_home', ['language_id' => $home->language_id]);
+        \App\Support\SiteSettings::save($home->language_id, ['home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/video/atmosphere-poster.jpg']);
+
         $html = $this->get('/fa')->assertOk()->getContent();
 
         $this->assertSame(1, substr_count($html, '<h1'));
         $this->assertStringContainsString('preload="none"', $html);
         $this->assertStringContainsString('atmosphere-poster.jpg', $html);
+        $this->assertStringNotContainsString('data-atmosphere-toggle', $html);
     }
 
     public function test_language_switcher_lists_only_the_other_languages(): void
