@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Admin\Resources;
+
+use App\Admin\Field;
+use App\Admin\Options;
+use App\Admin\Resource;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+
+class UserResource extends Resource
+{
+    public bool $copyable = false;
+
+    public bool $adminOnly = true;
+
+    public function model(): string
+    {
+        return User::class;
+    }
+
+    public function key(): string
+    {
+        return 'users';
+    }
+
+    public function title(): string
+    {
+        return 'کاربران';
+    }
+
+    public function fields(?Model $model): array
+    {
+        return [
+            Field::text('name', 'نام', ['required', 'string', 'max:120']),
+            Field::text('email', 'ایمیل', ['required', 'email', 'max:191', Rule::unique('users', 'email')->ignore($model?->id)]),
+            Field::password('password', 'رمز عبور', ! $model?->exists),
+            Field::select('role', 'نقش', Options::roles(), ['required', 'in:superadmin,admin,editor']),
+            Field::text('position', 'سمت (فقط نمایشی)', ['nullable', 'string', 'max:100']),
+            Field::checkbox('is_active', 'فعال'),
+        ];
+    }
+
+    public function columns(): array
+    {
+        return ['نام' => 'name', 'ایمیل' => 'email', 'نقش' => 'role', 'سمت' => 'position', 'فعال' => 'is_active', 'آخرین ورود' => 'last_login_at'];
+    }
+
+    /** The panel must always keep at least one active admin, or nobody can log in to fix it. */
+    public function check(array $data, ?Model $model): void
+    {
+        $actor = auth()->user();
+
+        // Only a superadmin may hand out or change the superadmin role.
+        if (! $actor->isSuper() && (($data['role'] ?? null) === 'superadmin' || $model?->isSuper())) {
+            throw ValidationException::withMessages(['role' => 'فقط مدیر ارشد می‌تواند نقش مدیر ارشد را تعیین یا تغییر دهد.']);
+        }
+
+        $demoted = ! in_array($data['role'] ?? null, ['admin', 'superadmin'], true) || ! ($data['is_active'] ?? false);
+
+        if ($model?->exists && $model->isAdmin() && $model->is_active && $demoted
+            && ! User::whereIn('role', ['admin', 'superadmin'])->where('is_active', true)->whereKeyNot($model->id)->exists()) {
+            throw ValidationException::withMessages(['role' => 'حداقل یک مدیر فعال باید باقی بماند.']);
+        }
+    }
+
+    public function canDelete(Model $model): bool
+    {
+        return $model->id !== auth()->id();
+    }
+}

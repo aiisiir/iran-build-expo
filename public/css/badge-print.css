@@ -1,0 +1,12 @@
+@font-face { font-family: "Vazirmatn"; src: url("../fonts/Vazirmatn-Variable.woff2") format("woff2"); font-weight: 100 900; }
+@page { size: 60mm 150mm; margin: 0; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Vazirmatn", Tahoma, sans-serif; background: #e9ecef; }
+.no-print { padding: 1rem; }
+.badge { width: 60mm; height: 150mm; margin: 0 auto 8mm; background: #fff; display: grid; grid-template-rows: 22mm 62mm auto 1fr 12mm; text-align: center; overflow: hidden; border-top: 6mm solid var(--accent); page-break-after: always; break-after: page; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.badge header { display: flex; align-items: center; justify-content: center; gap: 2mm; padding: 3mm 4mm; font-size: 3.4mm; font-weight: 700; color: #12263f; }
+.badge .photo { width: 40mm; height: 50mm; object-fit: cover; margin: 3mm auto; border-radius: 3mm; border: .6mm solid var(--accent); }
+.badge h1 { font-size: 6mm; margin: 2mm 3mm; line-height: 1.3; color: #12263f; }
+.badge .role { margin: 0 auto; align-self: start; background: var(--accent); color: #fff; font-weight: 700; font-size: 5mm; padding: 1.2mm 6mm; border-radius: 10mm; height: fit-content; }
+.badge footer { background: #12263f; color: #fff; font-size: 3mm; display: grid; place-items: center; }
+@media print { body { background: #fff; } .no-print { display: none; } .badge { margin: 0; } }

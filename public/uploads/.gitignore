@@ -1,0 +1,8 @@
+*
+!.htaccess
+!.gitignore
+!demo/
+!demo/*.svg
+!demo/*.webp
+!demo/*.jpg
+!demo/*.png

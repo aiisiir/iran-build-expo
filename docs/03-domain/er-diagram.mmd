@@ -1,0 +1,195 @@
+erDiagram
+    languages ||--o{ pages : "language_id"
+    languages ||--o{ posts : ""
+    languages ||--o{ categories : ""
+    languages ||--o{ link_groups : ""
+    languages ||--o{ companies : ""
+    languages ||--o{ galleries : ""
+    languages ||--o{ faqs : ""
+    languages ||--o{ settings : ""
+    languages ||--o{ media_assets : "optional"
+
+    pages ||--o{ page_modules : "page_id"
+    pages ||--o{ posts : "page_id (URL prefix)"
+    pages ||--o{ companies : "page_id (URL prefix)"
+    pages ||--o{ links : "type=page"
+    categories ||--o{ posts : ""
+    categories ||--o{ faqs : "optional"
+    editions ||--o{ posts : "optional"
+    editions ||--o{ galleries : "optional"
+    editions ||--o{ badges : ""
+    editions ||--o{ company_edition : ""
+    companies ||--o{ company_edition : ""
+    companies ||--o{ products : ""
+    products ||--o{ product_images : ""
+    media_assets ||--o{ product_images : ""
+    media_assets ||--o{ gallery_items : ""
+    galleries ||--o{ gallery_items : ""
+    galleries ||--o{ page_modules : "gallery module"
+    link_groups ||--o{ links : ""
+    link_groups ||--o{ page_modules : "links module"
+    links ||--o{ links : "parent_id (menu tree)"
+    badge_types ||--o{ badges : ""
+    users ||--o{ audit_events : ""
+    users ||--o{ badges : "reviewed_by"
+
+    languages {
+        bigint id PK
+        varchar code UK "fa, en, ..."
+        varchar direction "rtl|ltr"
+        bool is_active
+        bool is_default UK "1 or NULL"
+    }
+    users {
+        bigint id PK
+        varchar email UK
+        varchar password "bcrypt"
+        varchar role "admin|editor"
+        varchar position "display only"
+        bool is_active
+    }
+    editions {
+        bigint id PK
+        varchar code UK
+        date starts_on
+        date ends_on
+        bool is_current UK "1 or NULL"
+    }
+    media_assets {
+        bigint id PK
+        bigint language_id FK "nullable"
+        varchar kind "image|document"
+        varchar path UK
+        varchar mime
+        varchar alt
+        varchar title
+    }
+    categories {
+        bigint id PK
+        bigint language_id FK
+        varchar type "post|faq"
+        varchar slug "UK(language,type,slug)"
+        varchar translation_key "UK(key,language)"
+    }
+    pages {
+        bigint id PK
+        bigint language_id FK
+        varchar slug "UK(language,slug)"
+        bool is_home "UK(language,is_home)"
+        longtext body "sanitized"
+        varchar status
+        timestamp published_at
+    }
+    page_modules {
+        bigint id PK
+        bigint page_id FK
+        varchar type "posts|links|content|gallery|faq|companies|embed"
+        varchar title
+        bool show_title
+        bool is_active
+        varchar display "list|grid|slider|auto"
+        bigint source_page_id FK
+        bigint category_id FK
+        bigint link_group_id FK
+        bigint gallery_id FK
+    }
+    posts {
+        bigint id PK
+        bigint language_id FK
+        bigint page_id FK
+        bigint category_id FK
+        bigint edition_id FK "nullable"
+        varchar slug "UK(language,page,slug)"
+        longtext body "sanitized"
+        varchar link_url
+        timestamp published_at
+        timestamp expires_at
+        int view_count
+    }
+    link_groups {
+        bigint id PK
+        bigint language_id FK
+        varchar placement "menu|logo|quick_links|organizers|supporters|footer"
+        varchar title
+        bool show_title
+    }
+    links {
+        bigint id PK
+        bigint link_group_id FK
+        bigint parent_id FK
+        varchar label
+        bool show_label
+        varchar type "page|url|file"
+        bigint page_id FK
+        varchar url
+        bigint file_media_id FK
+        bigint icon_media_id FK
+        varchar target
+    }
+    galleries {
+        bigint id PK
+        bigint language_id FK
+        varchar title
+    }
+    gallery_items {
+        bigint id PK
+        bigint gallery_id FK
+        bigint media_id FK
+    }
+    faqs {
+        bigint id PK
+        bigint language_id FK
+        varchar question
+        text answer "sanitized"
+    }
+    companies {
+        bigint id PK
+        bigint language_id FK
+        bigint page_id FK
+        varchar slug "UK(language,page,slug)"
+        varchar industry "plain field"
+        longtext description "sanitized"
+    }
+    company_edition {
+        bigint company_id PK
+        bigint edition_id PK
+    }
+    products {
+        bigint id PK
+        bigint company_id FK
+        varchar slug "UK(company,slug)"
+    }
+    product_images {
+        bigint id PK
+        bigint product_id FK
+        bigint media_id FK
+    }
+    badge_types {
+        bigint id PK
+        varchar name UK
+        char color
+    }
+    badges {
+        bigint id PK
+        bigint edition_id FK
+        bigint badge_type_id FK
+        varchar full_name
+        text phone "encrypted"
+        text email "encrypted"
+        varchar gender
+        varchar status "pending|approved|rejected"
+        varchar photo_path "private storage"
+    }
+    settings {
+        bigint id PK
+        bigint language_id FK
+        varchar key "UK(language,key)"
+        text value
+    }
+    audit_events {
+        bigint id PK
+        bigint user_id FK
+        varchar event
+        varchar subject_type
+        text changes "field names only"
+    }

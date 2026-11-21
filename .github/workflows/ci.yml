@@ -15,7 +15,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: ctype, curl, dom, fileinfo, mbstring, openssl, pdo, pdo_sqlite, tokenizer, xml
           coverage: none
       - name: Validate Composer manifest
@@ -29,3 +29,36 @@ jobs:
           find app bootstrap config database lang public routes tests -type f -name '*.php' -print0 | xargs -0 -n1 php -l
       - name: Run automated tests
         run: php artisan test
+
+  # The production host runs MariaDB 10.4 (InnoDB, FKs, unique-on-nullable flags); sqlite alone cannot prove that.
+  mariadb:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: mariadb:10.4
+        env:
+          MARIADB_DATABASE: testing
+          MARIADB_USER: app
+          MARIADB_PASSWORD: secret
+          MARIADB_ROOT_PASSWORD: secret
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -psecret"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_CONNECTION: mariadb
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: testing
+      DB_USERNAME: app
+      DB_PASSWORD: secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, curl, dom, fileinfo, gd, mbstring, openssl, pdo, pdo_mysql, tokenizer, xml
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist
+      - name: Run the suite on MariaDB
+        run: vendor/bin/phpunit --no-progress
