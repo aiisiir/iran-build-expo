@@ -59,7 +59,23 @@ code { background: #eef1f5; padding: .1rem .3rem; border-radius: 4px; }
 .login-box { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 1.5rem; width: min(420px, 92vw); display: grid; gap: 1rem; }
 .login-box h1 { margin: 0; }
 .login-box label { display: grid; gap: .3rem; font-weight: 600; }
-@media (max-width: 800px) { body.admin { flex-direction: column; } .sidebar { width: 100%; } main { padding: .8rem; } }
+.nav-toggle { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; width: 44px; height: 44px; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--navy); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.nav-backdrop { position: fixed; inset: 0; background: rgba(10, 20, 35, .55); z-index: 40; }
+/* Phones and tablets: the side menu becomes a hamburger drawer, so the page never scrolls sideways. */
+@media (max-width: 960px) {
+    body.admin { display: block; }
+    .nav-toggle { display: inline-grid; place-items: center; }
+    .sidebar { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, 86vw); z-index: 50; transform: translateX(100%); visibility: hidden; transition: transform .25s ease, visibility .25s; }
+    body.nav-open .sidebar { transform: none; visibility: visible; }
+    body.nav-open { overflow: hidden; }
+    .topbar { flex-wrap: wrap; gap: .5rem .8rem; padding: .5rem .8rem; position: sticky; top: 0; z-index: 30; }
+    .topbar .who { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    main { padding: .8rem; }
+    .head { flex-wrap: wrap; }
+    .form { padding: .9rem; }
+}
+@media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
 
 /* Language tabs (site settings) */
 .tabs { display: flex; flex-wrap: wrap; gap: .25rem; margin: 0 0 1.2rem; border-bottom: 2px solid var(--line); }

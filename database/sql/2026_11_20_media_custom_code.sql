@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS `custom_snippets` (
 -- UPDATE `users` SET `role` = 'superadmin' WHERE `email` = 'YOUR-EMAIL';
 
 -- Badge form opens only while an edition is marked current. Either tick "current" on an edition in the panel, or:
--- INSERT INTO `editions` (`code`, `name`, `is_current`, `created_at`, `updated_at`) VALUES ('2027', 'Iran Build Expo 2027', 1, NOW(), NOW());
+-- INSERT INTO `editions` (`code`, `name`, `is_current`, `created_at`, `updated_at`) VALUES ('2027', 'Benis Fairs 2027', 1, NOW(), NOW());

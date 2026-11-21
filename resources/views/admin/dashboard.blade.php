@@ -9,11 +9,11 @@
 </div>
 @if ($events->isNotEmpty())
     <h2>آخرین فعالیت‌ها</h2>
-    <table>
+    <div class="table-wrap"><table>
         @foreach ($events as $e)
             <tr><td>{{ \App\Admin\Format::cell($e->created_at) }}</td><td>{{ $e->user?->name ?? '—' }}</td><td>{{ $e->event }}</td><td>{{ $e->subject_type }} {{ $e->subject_id }}</td><td dir="ltr">{{ $e->ip }}</td></tr>
         @endforeach
-    </table>
+    </table></div>
     <p><a href="{{ route('admin.resource.index', 'audit') }}">مشاهدهٔ فهرست کامل فعالیت‌ها</a></p>
 @endif
 @endsection

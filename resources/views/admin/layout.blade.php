@@ -13,7 +13,7 @@
     @endif
 </head>
 <body class="admin">
-<aside class="sidebar" aria-label="منوی مدیریت">
+<aside class="sidebar" id="sidebar" aria-label="منوی مدیریت">
     <a class="logo" href="{{ route('admin.dashboard') }}">{{ config('app.name') }}</a>
     <nav>
         <a href="{{ route('admin.dashboard') }}" @if (request()->routeIs('admin.dashboard')) aria-current="page" @endif>داشبورد</a>
@@ -36,9 +36,11 @@
         @endforeach
     </nav>
 </aside>
+<div class="nav-backdrop" data-nav-close hidden></div>
 <div class="main">
     <header class="topbar">
-        <span>{{ auth()->user()->name }}@if (auth()->user()->position) <small>— {{ auth()->user()->position }}</small>@endif</span>
+        <button class="nav-toggle" type="button" aria-controls="sidebar" aria-expanded="false" data-nav-toggle><span aria-hidden="true">☰</span><span class="sr-only">منو</span></button>
+        <span class="who">{{ auth()->user()->name }}@if (auth()->user()->position) <small>— {{ auth()->user()->position }}</small>@endif</span>
         <a href="{{ url('/') }}" target="_blank" rel="noopener">مشاهدهٔ سایت</a>
         <form method="post" action="{{ route('admin.logout') }}">@csrf <button class="link" type="submit">خروج</button></form>
     </header>

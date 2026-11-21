@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'home_title' => 'Iran Build Expo | Building Industry Exhibition',
-    'home_description' => 'Discover Iran Build Expo editions, exhibitors, products and business networking opportunities.',
+    'home_title' => 'Benis Fairs | International Building Exhibitions',
+    'home_description' => 'Discover Benis Fairs editions, exhibitors, products and business networking opportunities.',
 ];

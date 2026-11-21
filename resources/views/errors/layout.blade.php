@@ -15,7 +15,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex,nofollow">
-    <title>{{ $code }} — Iran Build Expo</title>
+    <title>{{ $code }} — Benis Fairs</title>
     <link rel="stylesheet" href="{{ url('css/site.css') }}">
 </head>
 <body>

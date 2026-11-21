@@ -6,6 +6,22 @@ document.addEventListener('submit', (event) => {
     }
 });
 
+// Hamburger drawer for the side menu on small screens (Esc, backdrop and a link click close it).
+const navToggle = document.querySelector('[data-nav-toggle]');
+if (navToggle) {
+    const backdrop = document.querySelector('.nav-backdrop');
+    const setNav = (open) => {
+        document.body.classList.toggle('nav-open', open);
+        navToggle.setAttribute('aria-expanded', String(open));
+        backdrop.hidden = !open;
+        if (!open) navToggle.focus();
+    };
+    navToggle.addEventListener('click', () => setNav(!document.body.classList.contains('nav-open')));
+    backdrop.addEventListener('click', () => setNav(false));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && document.body.classList.contains('nav-open')) setNav(false); });
+    document.querySelector('#sidebar').addEventListener('click', (e) => { if (e.target.closest('a')) document.body.classList.remove('nav-open'); });
+}
+
 document.addEventListener('click', (event) => {
     if (event.target.closest('[data-print]')) {
         window.print();

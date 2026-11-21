@@ -24,7 +24,8 @@ use Illuminate\Support\Facades\DB;
  * The complete first content of the site, in fa and en, built only from panel records: logo, menu, hero slides, news, supporters,
  * galleries, companies, FAQ, footer, the video band (settings). Nothing on the home page is written in a template.
  * Pictures: public/uploads/demo/{key}.webp|jpg|jpeg|png|svg is used when present (drop real photos there, see docs/content-guide.md);
- * otherwise a placeholder SVG is generated under that key. All texts are placeholders: no real dates, venues or sponsors.
+ * otherwise a placeholder SVG is generated under that key. Company and supporter names are real Iranian building-industry firms used as pilot demo data
+ * at the owner's request and responsibility (no logos are bundled: drop real ones under company-N / supporter-N). Dates and venues stay placeholders.
  * Refuses to run in production or on a database that already has pages, so real content is never touched.
  */
 class DemoContentSeeder extends Seeder
@@ -139,7 +140,7 @@ class DemoContentSeeder extends Seeder
         foreach ($t['companies_list'] as $i => [$name, $industry]) {
             Company::create([
                 'language_id' => $lang->id, 'translation_key' => "demo-company-{$i}", 'page_id' => $companies->id, 'name' => $name, 'slug' => $name,
-                'industry' => $industry, 'description' => "<p>{$t['sample']}</p>", 'sort_order' => $i, 'is_active' => true,
+                'logo_id' => $this->asset('company-'.($i + 1), 100, 100)->id, 'industry' => $industry, 'description' => "<p>{$t['sample']}</p>", 'sort_order' => $i, 'is_active' => true,
             ]);
         }
 
@@ -229,9 +230,9 @@ class DemoContentSeeder extends Seeder
             'home' => 'خانه', 'news' => 'اخبار', 'companies' => 'شرکت‌ها', 'about' => 'درباره ما', 'contact' => 'تماس با ما', 'badge' => 'ثبت‌نام کارت سینه',
             'about_body' => '<p>این متن نمونه است و باید با معرفی رسمی نمایشگاه جایگزین شود.</p>', 'contact_body' => '<p>اطلاعات تماس رسمی از بخش تنظیمات پنل وارد می‌شود.</p>',
             'sample' => 'این متن نمونه است و باید با محتوای رسمی جایگزین شود.',
-            'meta' => 'نمایشگاه بین‌المللی ساختمان ایران؛ اخبار، شرکت‌ها و محصولات صنعت ساختمان.',
-            'settings' => ['site_name' => 'نمایشگاه ساختمان ایران', 'tagline' => 'درگاه یکپارچهٔ صنعت ساختمان', 'meta_description' => 'نمایشگاه بین‌المللی ساختمان ایران؛ اخبار، شرکت‌ها و محصولات صنعت ساختمان.',
-                'footer_about' => 'درگاه اطلاع‌رسانی نمایشگاه ساختمان ایران.', 'footer_dates' => 'تاریخ برگزاری: به‌زودی اعلام می‌شود', 'footer_venue' => 'محل برگزاری: به‌زودی اعلام می‌شود', 'copyright' => '© نمایشگاه ساختمان ایران',
+            'meta' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ اخبار، شرکت‌ها و محصولات نمایشگاه‌های ساختمان.',
+            'settings' => ['site_name' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا', 'tagline' => 'درگاه یکپارچهٔ صنعت ساختمان', 'meta_description' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ اخبار، شرکت‌ها و محصولات نمایشگاه‌های ساختمان.',
+                'footer_about' => 'درگاه اطلاع‌رسانی توسعه نمایشگاه‌های بین‌المللی بنیس دیبا.', 'footer_dates' => 'تاریخ برگزاری: به‌زودی اعلام می‌شود', 'footer_venue' => 'محل برگزاری: به‌زودی اعلام می‌شود', 'copyright' => '© توسعه نمایشگاه‌های بین‌المللی بنیس دیبا',
                 'home_video_title' => 'جایی که صنعت دیدار می‌کند', 'home_video_text' => 'درگاه یکپارچهٔ معرفی نمایشگاه، شرکت‌ها، محصولات و فرصت‌های همکاری در صنعت ساختمان.',
                 'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/video/atmosphere-poster.jpg'],
             'categories' => ['اخبار', 'اطلاعیه‌ها', 'اسلایدر صفحهٔ اصلی'],
@@ -241,11 +242,12 @@ class DemoContentSeeder extends Seeder
             'slides' => [['معماری در مقیاس یادمانی', 'نشانه‌های معاصری که افق صنعت ساختمان را می‌سازند.'], ['میراث معماری ایران، بازتفسیر شده', 'زبانی کهن در معماری، ترجمه‌شده به نگاهی مدرن و بین‌المللی.'],
                 ['طراحی، مهندسی و سازه', 'جایی که معماری بین‌المللی با مهندسی دقیق دیدار می‌کند.'], ['فضای نمایشگاه', 'محل دیدار صنعت: غرفه‌ها، محصولات و متخصصان.']],
             'galleries' => ['سالن اصلی', 'غرفه‌ها', 'نشست‌ها و کارگاه‌ها', 'بازدیدکنندگان'],
-            'supporters_list' => ['حامی نمونهٔ الف', 'حامی نمونهٔ ب', 'حامی نمونهٔ ج', 'حامی نمونهٔ د', 'حامی نمونهٔ ه', 'حامی نمونهٔ و'],
-            'organizers_list' => ['برگزارکنندهٔ نمونهٔ الف', 'برگزارکنندهٔ نمونهٔ ب', 'برگزارکنندهٔ نمونهٔ ج'],
+            'supporters_list' => ['فولاد مبارکه اصفهان', 'سیمان تهران', 'ذوب‌آهن اصفهان', 'کاشی الوند', 'شیشه همدان', 'گروه مپنا'],
+            'organizers_list' => ['توسعه نمایشگاه‌های بین‌المللی بنیس دیبا'],
             'pillars_title' => 'یک درگاه برای صنعت ساختمان',
             'pillars' => '<ol><li><h3>نمایشگاه</h3><p>اطلاعات هر دورهٔ نمایشگاه.</p></li><li><h3>شرکت‌ها</h3><p>معرفی شرکت‌های حاضر در نمایشگاه.</p></li><li><h3>محصولات</h3><p>محصولاتی که هر شرکت عرضه می‌کند.</p></li><li><h3>فرصت‌های همکاری</h3><p>ارتباط و همکاری در سراسر صنعت ساختمان.</p></li></ol>',
-            'companies_list' => [['شرکت نمونه ۱', 'مصالح ساختمانی'], ['شرکت نمونه ۲', 'تأسیسات'], ['شرکت نمونه ۳', 'سازه و فولاد'], ['شرکت نمونه ۴', 'کاشی و سرامیک']],
+            'companies_list' => [['ایران‌رادیاتور', 'تأسیسات حرارتی'], ['لوله و ماشین‌سازی ایران', 'لوله و اتصالات'], ['ایران‌ترانسفو', 'تجهیزات برق'], ['سیمان هگمتان', 'سیمان'],
+                ['فولاد خوزستان', 'فولاد و ورق'], ['کاشی حافظ', 'کاشی و سرامیک'], ['کاشی سعدی', 'کاشی و سرامیک'], ['شیشه قزوین', 'شیشهٔ ساختمانی']],
             'latest' => 'آخرین اخبار', 'announcements' => 'اطلاعیه‌ها', 'quick' => 'دسترسی سریع', 'companies_title' => 'شرکت‌های حاضر',
             'tour' => 'تور مجازی', 'organizers' => 'برگزارکنندگان', 'supporters' => 'حامیان',
             'footer_a' => 'دربارهٔ ما', 'footer_b' => 'دسترسی', 'faq_title' => 'پرسش‌های متداول',
@@ -255,9 +257,9 @@ class DemoContentSeeder extends Seeder
             'home' => 'Home', 'news' => 'News', 'companies' => 'Companies', 'about' => 'About', 'contact' => 'Contact', 'badge' => 'Badge registration',
             'about_body' => '<p>Sample text. Replace it with the official introduction of the exhibition.</p>', 'contact_body' => '<p>Official contact details are entered in the panel settings.</p>',
             'sample' => 'Sample text. Replace it with official content.',
-            'meta' => 'Iran Build Expo: news, companies and products of the building industry.',
-            'settings' => ['site_name' => 'Iran Build Expo', 'tagline' => 'One gateway to the building industry', 'meta_description' => 'Iran Build Expo: news, companies and products of the building industry.',
-                'footer_about' => 'Information portal of Iran Build Expo.', 'footer_dates' => 'Dates: to be announced', 'footer_venue' => 'Venue: to be announced', 'copyright' => '© Iran Build Expo',
+            'meta' => 'Benis Fairs: news, companies and products of building exhibitions.',
+            'settings' => ['site_name' => 'Benis Fairs', 'tagline' => 'One gateway to the building industry', 'meta_description' => 'Benis Fairs: news, companies and products of building exhibitions.',
+                'footer_about' => 'Information portal of Benis Fairs.', 'footer_dates' => 'Dates: to be announced', 'footer_venue' => 'Venue: to be announced', 'copyright' => '© Benis Fairs',
                 'home_video_title' => 'Where the industry meets', 'home_video_text' => 'A unified gateway to the exhibition, companies, products and business opportunities in the building industry.',
                 'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/video/atmosphere-poster.jpg'],
             'categories' => ['News', 'Announcements', 'Home slider'],
@@ -267,11 +269,12 @@ class DemoContentSeeder extends Seeder
             'slides' => [['Architecture at monumental scale', 'Contemporary landmarks that shape the skyline of the building industry.'], ['Iranian heritage, reinterpreted', 'A centuries-old architectural language, translated into a modern, international outlook.'],
                 ['Design, engineering and structure', 'Where international architecture meets precise engineering.'], ['The exhibition floor', 'The meeting place of the industry: stands, products and professionals.']],
             'galleries' => ['Main hall', 'Stands', 'Sessions and workshops', 'Visitors'],
-            'supporters_list' => ['Sample supporter A', 'Sample supporter B', 'Sample supporter C', 'Sample supporter D', 'Sample supporter E', 'Sample supporter F'],
-            'organizers_list' => ['Sample organizer A', 'Sample organizer B', 'Sample organizer C'],
+            'supporters_list' => ['Mobarakeh Steel Company', 'Tehran Cement Company', 'Esfahan Steel Company', 'Alvand Tile', 'Hamadan Glass', 'MAPNA Group'],
+            'organizers_list' => ['Benis Fairs'],
             'pillars_title' => 'One gateway to the industry',
             'pillars' => '<ol><li><h3>The exhibition</h3><p>Information about each edition of the exhibition.</p></li><li><h3>Companies</h3><p>Profiles of the companies taking part.</p></li><li><h3>Products</h3><p>Products presented by each company.</p></li><li><h3>Business opportunities</h3><p>Contacts and cooperation across the building industry.</p></li></ol>',
-            'companies_list' => [['Sample Company 1', 'Building materials'], ['Sample Company 2', 'HVAC and plumbing'], ['Sample Company 3', 'Structure and steel'], ['Sample Company 4', 'Tiles and ceramics']],
+            'companies_list' => [['Iran Radiator', 'Heating equipment'], ['Iran Tube & Machine Manufacturing', 'Pipes and fittings'], ['Iran Transfo', 'Electrical equipment'], ['Hegmatan Cement', 'Cement'],
+                ['Khuzestan Steel', 'Steel and sheet'], ['Hafez Tile', 'Tiles and ceramics'], ['Saadi Tile', 'Tiles and ceramics'], ['Qazvin Glass', 'Architectural glass']],
             'latest' => 'Latest news', 'announcements' => 'Announcements', 'quick' => 'Quick links', 'companies_title' => 'Participating companies',
             'tour' => 'Virtual tour', 'organizers' => 'Organizers', 'supporters' => 'Supporters',
             'footer_a' => 'About', 'footer_b' => 'Explore', 'faq_title' => 'Frequently asked questions',
