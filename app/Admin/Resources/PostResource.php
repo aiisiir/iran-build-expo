@@ -56,7 +56,7 @@ class PostResource extends Resource
             Field::text('lead', 'روتیتر', ['nullable', 'string', 'max:300']),
             Field::textarea('summary', 'خلاصه'),
             Field::media('image_id', 'تصویر', MediaKind::Image, ['nullable', 'exists:media_assets,id']),
-            Field::text('source_name', 'منبع', ['nullable', 'string', 'max:191']),
+            Field::text('source_name', 'منبع خبر / متن دکمهٔ اسلاید', ['nullable', 'string', 'max:191']),
             Field::text('link_url', 'لینک (داخلی یا خارجی)', ['nullable', 'string', 'max:2048', new SafeUrl]),
             Field::checkbox('is_featured', 'ویژه', false),
             Field::number('sort_order', 'ترتیب'),

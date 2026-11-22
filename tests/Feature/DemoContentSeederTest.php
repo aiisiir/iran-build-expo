@@ -20,14 +20,13 @@ class DemoContentSeederTest extends TestCase
         foreach (['fa' => 'آخرین اخبار', 'en' => 'Latest news'] as $code => $latest) {
             $html = $this->get("/{$code}")->assertOk()->assertSee($latest)->getContent();
 
-            $this->assertSame(4, substr_count($html, 'aria-roledescription="slide"'), "hero slides ({$code})");
-            foreach (['pillars-block', 'class="cards', 'class="link-list', 'class="companies"', 'class="gallery"', 'class="embed"', 'class="faq"', 'data-atmosphere', 'site-footer', 'id="primary-nav"'] as $marker) {
+            $this->assertSame(1, substr_count($html, 'aria-roledescription="slide"'), "hero slides ({$code})");
+            foreach (['class="hero"', 'quick-actions', 'about-panel', 'resources-section', 'news-section', 'registration-section', 'gallery-section', 'site-footer', 'id="primary-nav"'] as $marker) {
                 $this->assertStringContainsString($marker, $html, "{$marker} missing ({$code})");
             }
             $this->assertStringContainsString("/{$code}/badge", $html);
             $this->assertStringContainsString('class="brand-logo"', $html); // logo is a panel record
-            $this->assertStringNotContainsString('data-hero-toggle', $html);
-            $this->assertStringNotContainsString('data-atmosphere-toggle', $html);
+            $this->assertStringNotContainsString('Iran Build Expo', $html);
             $lang = $this->lang($code);
             $this->assertSame(4, \App\Models\Post::where('language_id', $lang->id)->whereHas('category', fn ($q) => $q->where('name', $this->news($code)))->count());
             $this->assertSame(6, \App\Models\Link::whereHas('group', fn ($q) => $q->where('language_id', $lang->id)->where('placement', 'supporters'))->whereNotNull('icon_media_id')->count());

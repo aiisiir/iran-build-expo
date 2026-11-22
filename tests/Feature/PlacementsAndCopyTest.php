@@ -30,11 +30,9 @@ class PlacementsAndCopyTest extends TestCase
         [$post, $other] = $this->demoPost();
         $post->placedPages()->attach($other->id);
 
-        $main = url($post->path());
-        $this->get($post->path())->assertOk();
-        $this->get("/{$post->language->code}/{$other->slug}/{$post->slug}")->assertOk()
+        $this->assertSame("/{$post->language->code}/news/{$post->id}", $post->path());
+        $this->get($post->path())->assertOk()
             ->assertSee('<link rel="canonical" href="'.\App\Support\PublicUrl::absolute($post->path()).'">', false);
-        $this->assertStringContainsString($post->page->slug, $main);
     }
 
     public function test_modules_show_records_placed_on_their_page_and_in_extra_categories(): void

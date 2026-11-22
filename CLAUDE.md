@@ -1,4 +1,4 @@
-# Iran Build Expo — Claude Code instructions
+# Benis Fairs — Claude Code instructions
 
 Read `AGENTS.md`, `README.md`, `docs/AI_Learns.md` and the relevant documents under `docs/` before changing implementation.
 

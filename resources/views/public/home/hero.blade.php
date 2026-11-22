@@ -1,20 +1,19 @@
-{{-- $hero: Collection<Post> from the page's "hero" posts module; nothing is shown without it. --}}
+{{-- $hero: posts of the page's "hero" module (title = bold line, lead = light line, summary = text, source name = button label, link = button target).
+     $utility: modules shown in the strip that overlaps the hero's bottom edge (links = quick actions, content with image = partner logos). --}}
 @if (($hero ?? null)?->isNotEmpty())
-@php
-    $slides = $hero->map(fn ($p) => ['title' => $p->title, 'text' => $p->summary ?: $p->lead, 'media' => $p->image, 'url' => $p->link_url ?: \App\Support\PublicUrl::path($p->path())])->all();
-    $total = count($slides);
-    $code = app('site.language')->code; // the layout's $language is not yet shared while sections render
-@endphp
-<section class="hero-slider" role="region" aria-roledescription="carousel" aria-label="{{ __('home.hero_label') }}" data-hero>
+@php($total = $hero->count())
+<section class="hero" role="region" aria-roledescription="carousel" aria-label="{{ __('home.hero_label') }}" data-hero>
     <ul class="hero-slides">
-        @foreach ($slides as $i => $s)
-            <li @class(['hero-slide', 'is-active' => $loop->first]) role="group" aria-roledescription="slide" aria-label="{{ __('home.slide_of', ['n' => $i + 1, 'total' => $total]) }}">
-                @if ($s['media'])@include('public.partials.image', ['media' => $s['media'], 'alt' => $s['title'], 'class' => 'hero-image', 'eager' => $loop->first, 'priority' => $loop->first])@endif
-                <div class="container hero-copy-wrap">
+        @foreach ($hero as $post)
+            @php($url = $post->link_url ?: \App\Support\PublicUrl::path($post->path()))
+            <li @class(['hero-slide', 'is-active' => $loop->first]) role="group" aria-roledescription="slide" aria-label="{{ __('home.slide_of', ['n' => $loop->iteration, 'total' => $total]) }}">
+                @if ($post->image)@include('public.partials.image', ['media' => $post->image, 'alt' => $post->image->alt ?: '', 'class' => 'hero-photo', 'eager' => $loop->first, 'priority' => $loop->first])@endif
+                <div class="hero-blue" aria-hidden="true"></div><div class="hero-fade" aria-hidden="true"></div>
+                <div class="container hero-inner">
                     <div class="hero-copy">
-                        <h2>{{ $s['title'] }}</h2>
-                        @if ($s['text'])<p>{{ $s['text'] }}</p>@endif
-                        @if ($s['url'])<a class="btn btn-gold" href="{{ $s['url'] }}">{{ __('site.read_more') }}<span class="sr-only"> — {{ $s['title'] }}</span></a>@endif
+                        <h2 class="hero-title"><strong>{{ $post->title }}</strong>@if ($post->lead)<span>{{ $post->lead }}</span>@endif</h2>
+                        @if ($post->summary)<p>{{ $post->summary }}</p>@endif
+                        @if ($url)<a class="button button--green hero-cta" href="{{ $url }}">{{ $post->source_name ?: __('site.read_more') }}<span class="sr-only"> — {{ $post->title }}</span></a>@endif
                     </div>
                 </div>
             </li>
@@ -24,7 +23,23 @@
         <div class="hero-controls" data-hero-controls hidden>
             <button type="button" class="ctl" data-hero-prev aria-label="{{ __('home.prev') }}"><span aria-hidden="true">‹</span></button>
             <button type="button" class="ctl" data-hero-next aria-label="{{ __('home.next') }}"><span aria-hidden="true">›</span></button>
-            <span class="hero-count" aria-hidden="true"><span data-hero-current>{{ \App\Support\Digits::forLocale('1', $code) }}</span> / {{ \App\Support\Digits::forLocale((string) $total, $code) }}</span>
+        </div>
+    @endif
+    @if (($utility ?? collect())->isNotEmpty())
+        <div class="container hero-utility">
+            @foreach ($utility as $module)
+                @if ($module->type->value === 'links')
+                    <div class="quick-actions" role="group" @if ($module->title) aria-label="{{ $module->title }}" @endif>
+                        @foreach ($module->items as $link)
+                            @if ($href = $link->href())
+                                <a href="{{ $href }}" @if ($link->target === '_blank') target="_blank" rel="noopener noreferrer" @endif><span>@if ($link->iconMedia)@include('public.partials.image', ['media' => $link->iconMedia, 'class' => 'link-icon', 'alt' => ''])@endif</span><strong>{{ $link->label }}</strong></a>
+                            @endif
+                        @endforeach
+                    </div>
+                @elseif ($module->media)
+                    <div class="partners">@include('public.partials.image', ['media' => $module->media, 'alt' => $module->media->alt ?: $module->title])</div>
+                @endif
+            @endforeach
         </div>
     @endif
 </section>

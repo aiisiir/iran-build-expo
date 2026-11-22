@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{{ url('css/site.css') }}">
 </head>
 <body>
-    <main class="hero error-box">
+    <main class="error-box">
         <p class="eyebrow">{{ $code }}</p>
         <h1 lang="fa" dir="rtl">{{ $fa }}</h1>
         <p lang="en" dir="ltr">{{ $en }}</p>

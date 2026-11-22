@@ -7,7 +7,8 @@
     <link rel="icon" href="{{ url('favicon.svg') }}" type="image/svg+xml">
     <link rel="icon" href="{{ url('favicon.ico') }}" sizes="48x48">
     <link rel="apple-touch-icon" href="{{ url('apple-touch-icon.png') }}">
-    <meta name="theme-color" content="#F5EFE2">
+    <meta name="theme-color" content="#245e9f">
+    <link rel="preload" href="{{ asset('fonts/Vazirmatn-Variable.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/site.css') }}?v={{ filemtime(public_path('css/site.css')) }}">
     @php($custom = \App\Models\CustomSnippet::bundles())
     @if ($custom['css'])<link rel="stylesheet" href="{{ route('custom.asset', 'css') }}?v={{ $custom['css']['version'] }}">@endif
@@ -17,49 +18,77 @@
 <body class="lang-{{ $language->code }}">
     <a class="skip-link" href="#main-content">{{ __('site.skip') }}</a>
     <header class="site-header">
-        <div class="header-bar">
-            <div class="container header-row">
-                @php($brandName = $logoLink?->label ?: ($site['site_name'] ?? config('app.name')))
-                <a class="brand" href="{{ url('/'.$language->code) }}">
-                    @if ($logoLink?->iconMedia)@include('public.partials.image', ['media' => $logoLink->iconMedia, 'class' => 'brand-logo', 'eager' => true, 'alt' => ''])@endif
-                    <span class="brand-name" @class(['sr-only' => $logoLink && ! $logoLink->show_label])>{{ $brandName }}</span>
+        <div class="container masthead">
+            @php($brandName = $logoLink?->label ?: ($site['site_name'] ?? config('app.name')))
+            <a class="brand" href="{{ url('/'.$language->code) }}">
+                <span class="brand-mark">
+                    @if ($logoLink?->iconMedia)@include('public.partials.image', ['media' => $logoLink->iconMedia, 'class' => 'brand-logo', 'eager' => true, 'alt' => $brandName])@endif
+                    @isset($site['brand_caption'])<small lang="en" aria-hidden="true">{{ $site['brand_caption'] }}</small>@endisset
+                </span>
+                <span class="brand-copy">
+                    <span>{{ $site['site_name'] ?? config('app.name') }}</span>
+                    @isset($site['tagline'])<strong>{{ $site['tagline'] }}</strong>@endisset
+                </span>
+            </a>
+            @isset($site['header_contact_title'])
+                <a class="header-contact" href="{{ isset($site['footer_phone']) ? 'tel:'.preg_replace('/[^\d+]/', '', $site['footer_phone']) : url('/'.$language->code) }}">
+                    <x-icon name="phone" />
+                    <span><strong>{{ $site['header_contact_title'] }}</strong>@isset($site['header_contact_text'])<small>{{ $site['header_contact_text'] }}</small>@endisset</span>
                 </a>
-                <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle><span class="nav-toggle-bars" aria-hidden="true"></span><span class="sr-only">{{ __('site.menu') }}</span></button>
-                <nav id="primary-nav" class="primary-nav" aria-label="{{ __('site.main_nav') }}">
-                    @include('public.partials.menu', ['byParent' => $menuLinks, 'parent' => 0, 'depth' => 0])
-                </nav>
-                @if ($switcher->isNotEmpty())
-                    <nav class="lang-switch" aria-label="{{ __('site.languages') }}">
-                        @foreach ($switcher as $item)
-                            <a lang="{{ $item['language']->code }}" hreflang="{{ $item['language']->htmlLang() }}" href="{{ $item['url'] }}">{{ $item['language']->native_name }}</a>
-                        @endforeach
-                    </nav>
-                @endif
-            </div>
+            @endisset
+            <button class="menu-toggle icon-button" type="button" aria-expanded="false" aria-controls="primary-nav" data-nav-toggle><x-icon name="menu" /><span class="sr-only">{{ __('site.menu') }}</span></button>
         </div>
+        <nav id="primary-nav" class="container primary-nav" aria-label="{{ __('site.main_nav') }}">
+            @include('public.partials.menu', ['byParent' => $menuLinks, 'parent' => 0, 'depth' => 0])
+            @if ($switcher->isNotEmpty())
+                <nav class="lang-switch" aria-label="{{ __('site.languages') }}">
+                    @foreach ($switcher as $item)
+                        <a class="language-link" lang="{{ $item['language']->code }}" hreflang="{{ $item['language']->htmlLang() }}" href="{{ $item['url'] }}">{{ $item['language']->native_name }}</a>
+                    @endforeach
+                </nav>
+            @endif
+        </nav>
     </header>
-    <span class="header-sentinel" data-header-sentinel aria-hidden="true"></span>
     <main id="main-content">
         @yield('content')
     </main>
     <footer class="site-footer">
+        <div class="footer-glow" aria-hidden="true"></div>
         <div class="container footer-grid">
-            <div>
-                <p class="footer-brand">@if ($logoLink?->iconMedia)@include('public.partials.image', ['media' => $logoLink->iconMedia, 'class' => 'footer-symbol', 'alt' => ''])@endif<strong>{{ $site['site_name'] ?? config('app.name') }}</strong></p>
-                @foreach (['footer_about', 'footer_dates', 'footer_venue', 'footer_address'] as $key)
-                    @isset($site[$key])<p>{{ $site[$key] }}</p>@endisset
+            <div class="footer-contact">
+                <h2><x-icon name="building" />{{ $site['site_name'] ?? config('app.name') }}</h2>
+                @isset($site['footer_about'])<p>{{ $site['footer_about'] }}</p>@endisset
+                @isset($site['footer_phone'])<a href="tel:{{ preg_replace('/[^\d+]/', '', $site['footer_phone']) }}"><x-icon name="phone" /><span dir="ltr">{{ $site['footer_phone'] }}</span></a>@endisset
+                @isset($site['footer_email'])<a href="mailto:{{ $site['footer_email'] }}"><x-icon name="mail" /><span dir="ltr">{{ $site['footer_email'] }}</span></a>@endisset
+                @isset($site['footer_address'])<div class="footer-line"><x-icon name="location" /><span>{{ $site['footer_address'] }}</span></div>@endisset
+                @foreach (['footer_dates' => 'calendar', 'footer_venue' => 'map'] as $key => $icon)
+                    @isset($site[$key])<div class="footer-line"><x-icon :name="$icon" /><span>{{ $site[$key] }}</span></div>@endisset
                 @endforeach
-                @isset($site['footer_phone'])<p><a href="tel:{{ preg_replace('/[^\d+]/', '', $site['footer_phone']) }}" dir="ltr">{{ $site['footer_phone'] }}</a></p>@endisset
-                @isset($site['footer_email'])<p><a href="mailto:{{ $site['footer_email'] }}">{{ $site['footer_email'] }}</a></p>@endisset
             </div>
             @foreach ($footerGroups as $entry)
-                <nav aria-label="{{ $entry['group']->title ?: __('site.footer_nav') }}">
-                    @if ($entry['group']->show_title && $entry['group']->title)<strong>{{ $entry['group']->title }}</strong>@endif
-                    @include('public.partials.menu', ['byParent' => $entry['links'], 'parent' => 0, 'depth' => 0])
+                <nav class="footer-links" aria-label="{{ $entry['group']->title ?: __('site.footer_nav') }}">
+                    @if ($entry['group']->show_title && $entry['group']->title)<h2><x-icon :name="$loop->first ? 'globe' : 'layers'" />{{ $entry['group']->title }}</h2>@endif
+                    <ul>
+                        @foreach ($entry['links']->get(0, collect()) as $link)<li>@include('public.partials.link', ['link' => $link, 'chevron' => true])</li>@endforeach
+                    </ul>
                 </nav>
             @endforeach
+            <div class="footer-brand">
+                <a href="{{ url('/'.$language->code) }}">
+                    <span class="brand-mark"><img src="{{ asset('brand/benis-wordmark-white.svg') }}" alt="" width="112" height="36">@isset($site['brand_caption'])<small lang="en" aria-hidden="true">{{ $site['brand_caption'] }}</small>@endisset</span>
+                    <strong lang="en">{{ mb_strtoupper(config('app.name')) }}</strong>
+                </a>
+                <p>{{ $site['site_name'] ?? config('app.name') }}</p>
+                <div class="footer-building" aria-hidden="true"></div>
+            </div>
         </div>
-        <p class="container copyright">{{ $site['copyright'] ?? '© '.date('Y').' '.config('app.name') }}</p>
+        <div class="container footer-bottom">
+            <span>{{ $site['copyright'] ?? '© '.date('Y').' '.config('app.name') }}</span>
+            <div class="footer-bottom-links">
+                @isset($site['footer_email'])<a href="mailto:{{ $site['footer_email'] }}" aria-label="{{ $site['footer_email'] }}"><x-icon name="mail" /></a>@endisset
+                @foreach ($switcher as $item)<a lang="{{ $item['language']->code }}" hreflang="{{ $item['language']->htmlLang() }}" href="{{ $item['url'] }}">{{ mb_strtoupper($item['language']->code) }}</a>@endforeach
+            </div>
+        </div>
     </footer>
 </body>
 </html>

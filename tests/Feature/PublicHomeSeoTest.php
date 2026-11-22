@@ -85,7 +85,7 @@ class PublicHomeSeoTest extends TestCase
         $this->makePost($news, ['title' => 'اسلاید یک']);
         PageModule::create(['page_id' => $home->id, 'type' => 'posts', 'title' => 'هیرو', 'source_page_id' => $news->id, 'display' => 'hero']);
 
-        $this->get('/fa')->assertOk()->assertSee('اسلاید یک')->assertSee('class="btn btn-gold"', false)
+        $this->get('/fa')->assertOk()->assertSee('اسلاید یک')->assertSee('class="button button--green hero-cta"', false)
             ->assertDontSee('معماری در مقیاس یادمانی') // built-in placeholder copy is replaced
             ->assertDontSee('class="section module module-posts"', false);
     }

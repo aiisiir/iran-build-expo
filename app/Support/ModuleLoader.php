@@ -33,7 +33,7 @@ final class ModuleLoader
         return match ($module->type) {
             ModuleType::Posts => Post::live()->where('language_id', $page->language_id)->onPage($module->effectiveSourcePageId())
                 ->when($module->category_id, fn ($q, $id) => $q->inCategory($id))
-                ->with(['image', 'page', 'language'])->orderByDesc('is_featured')->orderBy('sort_order')->orderByDesc('published_at')->limit($limit)->get(),
+                ->with(['image', 'page', 'language', 'category'])->orderByDesc('is_featured')->orderBy('sort_order')->orderByDesc('published_at')->limit($limit)->get(),
             ModuleType::Companies => Company::where('language_id', $page->language_id)->onPage($module->effectiveSourcePageId())->where('is_active', true)
                 ->with(['logo', 'page', 'language'])->orderBy('sort_order')->orderBy('name')->limit($limit)->get(),
             // A module without its own group/gallery shows the ones placed on this page.

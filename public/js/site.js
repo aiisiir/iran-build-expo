@@ -3,34 +3,28 @@ const root = document.documentElement;
 root.classList.add('js');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
-// Mobile navigation: toggle, Esc closes and returns focus.
+// Mobile navigation: toggle, Esc / outside click / link click closes (Esc returns focus).
 document.querySelectorAll('[data-nav-toggle]').forEach((button) => {
     const nav = document.getElementById(button.getAttribute('aria-controls'));
     const set = (open) => { nav.classList.toggle('open', open); button.setAttribute('aria-expanded', String(open)); };
     button.addEventListener('click', () => set(!nav.classList.contains('open')));
+    nav.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+    document.addEventListener('click', (e) => { if (!e.target.closest('.site-header')) set(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && nav.classList.contains('open')) { set(false); button.focus(); } });
+    matchMedia('(min-width: 741px)').addEventListener('change', () => set(false));
 });
-
-// Header: only needed where scroll-driven animations are missing; one observer, no scroll listener.
-const sentinel = document.querySelector('[data-header-sentinel]');
-const bar = document.querySelector('.header-bar');
-if (sentinel && bar && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => bar.classList.toggle('is-scrolled', !entry.isIntersecting)).observe(sentinel);
-}
 
 // Hero carousel: autoplay only when motion is allowed; stops while hovered, focused or in a hidden tab; prev/next and arrow keys always work.
 document.querySelectorAll('[data-hero]').forEach((hero) => {
     const slides = [...hero.querySelectorAll('.hero-slide')];
     const controls = hero.querySelector('[data-hero-controls]');
     if (slides.length < 2 || !controls) return;
-    const counter = hero.querySelector('[data-hero-current]');
     const list = hero.querySelector('.hero-slides');
     let index = 0; let timer = null;
 
     const show = (i) => {
         index = (i + slides.length) % slides.length;
         slides.forEach((s, n) => { s.classList.toggle('is-active', n === index); s.toggleAttribute('inert', n !== index); s.setAttribute('aria-hidden', String(n !== index)); });
-        counter.textContent = new Intl.NumberFormat(document.documentElement.lang).format(index + 1);
     };
     const stop = () => { clearInterval(timer); timer = null; list.setAttribute('aria-live', 'polite'); };
     const start = () => { if (reduced.matches || timer) return; list.setAttribute('aria-live', 'off'); timer = setInterval(() => show(index + 1), 7000); };
@@ -49,14 +43,30 @@ document.querySelectorAll('[data-hero]').forEach((hero) => {
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
 });
 
-// Background video: muted and decorative; plays only while visible, never with reduced motion or data saver (the poster stays).
-document.querySelectorAll('[data-atmosphere]').forEach((section) => {
-    const video = section.querySelector('[data-atmosphere-video]');
-    if (!video || reduced.matches || navigator.connection?.saveData) return;
-    let visible = false;
-    const sync = () => (visible && !document.hidden ? video.play().catch(() => {}) : video.pause());
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; sync(); }, { threshold: 0.15 }).observe(section);
-    document.addEventListener('visibilitychange', sync);
+// Home news carousel: desktop rotates the cards in place, mobile scrolls a snap track to the chosen card.
+document.querySelectorAll('[data-news]').forEach((root) => {
+    const track = root.querySelector('.news-track');
+    const cards = [...track.children];
+    const dots = [...(root.parentElement.querySelectorAll('.carousel-dots button'))];
+    const status = root.parentElement.querySelector('.news-update');
+    const mobile = matchMedia('(max-width: 740px)');
+    let current = 0;
+    const mark = () => dots.forEach((dot, i) => (i === current ? dot.setAttribute('aria-current', 'true') : dot.removeAttribute('aria-current')));
+    const go = (next) => {
+        current = (next + cards.length) % cards.length;
+        mark();
+        if (mobile.matches) {
+            const card = cards[current].getBoundingClientRect(); const box = track.getBoundingClientRect();
+            track.scrollBy({ left: card.left - box.left - (box.width - card.width) / 2, behavior: reduced.matches ? 'auto' : 'smooth' });
+        } else {
+            cards.forEach((_, i) => track.append(cards[(current + i) % cards.length]));
+            if (!reduced.matches) track.animate([{ opacity: 0.45 }, { opacity: 1 }], { duration: 230 });
+        }
+        if (status) status.textContent = cards[current].querySelector('h3').textContent;
+    };
+    root.querySelectorAll('[data-carousel]').forEach((b) => b.addEventListener('click', () => go(current + (b.dataset.carousel === 'next' ? 1 : -1))));
+    dots.forEach((dot) => dot.addEventListener('click', () => go(Number(dot.dataset.slide))));
+    mobile.addEventListener('change', () => { cards.forEach((c) => track.append(c)); current = 0; mark(); });
 });
 
 document.querySelectorAll('[data-slider]').forEach((slider) => {

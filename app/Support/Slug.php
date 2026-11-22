@@ -5,7 +5,7 @@ namespace App\Support;
 /** URL slugs keep Persian letters (UTF-8 URLs are valid and indexable); they are never transliterated. */
 final class Slug
 {
-    public const RESERVED = ['badge', 'admin', 'api', 'up'];
+    public const RESERVED = ['badge', 'admin', 'api', 'up', 'news', 'company', 'product', 'gallery'];
 
     public static function make(string $text, int $max = 160): string
     {

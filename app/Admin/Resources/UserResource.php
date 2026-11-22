@@ -37,7 +37,7 @@ class UserResource extends Resource
             Field::text('name', 'نام', ['required', 'string', 'max:120']),
             Field::text('email', 'ایمیل', ['required', 'email', 'max:191', Rule::unique('users', 'email')->ignore($model?->id)]),
             Field::password('password', 'رمز عبور', ! $model?->exists),
-            Field::select('role', 'نقش', Options::roles(), ['required', 'in:superadmin,admin,editor']),
+            Field::select('role', 'نقش', Options::panelRoles(), ['required', 'in:admin,editor']),
             Field::text('position', 'سمت (فقط نمایشی)', ['nullable', 'string', 'max:100']),
             Field::checkbox('is_active', 'فعال'),
         ];
@@ -48,14 +48,12 @@ class UserResource extends Resource
         return ['نام' => 'name', 'ایمیل' => 'email', 'نقش' => 'role', 'سمت' => 'position', 'فعال' => 'is_active', 'آخرین ورود' => 'last_login_at'];
     }
 
-    /** The panel must always keep at least one active admin, or nobody can log in to fix it. */
+    /** The panel must always keep at least one active admin, or nobody can log in to fix it. Superadmins are read-only here. */
     public function check(array $data, ?Model $model): void
     {
-        $actor = auth()->user();
-
-        // Only a superadmin may hand out or change the superadmin role.
-        if (! $actor->isSuper() && (($data['role'] ?? null) === 'superadmin' || $model?->isSuper())) {
-            throw ValidationException::withMessages(['role' => 'فقط مدیر ارشد می‌تواند نقش مدیر ارشد را تعیین یا تغییر دهد.']);
+        // A superadmin is created, promoted, demoted and removed in the database only; the panel never touches one.
+        if ($model?->isSuper()) {
+            throw ValidationException::withMessages(['role' => 'مدیر ارشد فقط از طریق پایگاه داده قابل تغییر است.']);
         }
 
         $demoted = ! in_array($data['role'] ?? null, ['admin', 'superadmin'], true) || ! ($data['is_active'] ?? false);
@@ -68,6 +66,6 @@ class UserResource extends Resource
 
     public function canDelete(Model $model): bool
     {
-        return $model->id !== auth()->id();
+        return ! $model->isSuper() && $model->id !== auth()->id();
     }
 }

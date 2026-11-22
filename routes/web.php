@@ -35,9 +35,11 @@ Route::middleware('throttle:public')->group(function () use ($stateless): void {
         Route::withoutMiddleware($stateless)->group(function (): void {
             Route::get('/', [PageController::class, 'home'])->name('public.home');
             Route::get('gallery/{id}', [GalleryController::class, 'show'])->whereNumber('id')->name('public.gallery');
+            // The object type is a fixed flag in the URL: /{locale}/news/{id}, /{locale}/company/{id}, /{locale}/product/{id}.
+            Route::get('news/{id}', [ItemController::class, 'post'])->whereNumber('id')->name('public.post');
+            Route::get('company/{id}', [ItemController::class, 'company'])->whereNumber('id')->name('public.company');
+            Route::get('product/{id}', [ProductController::class, 'show'])->whereNumber('id')->name('public.product');
             Route::get('{page}', [PageController::class, 'show'])->name('public.page');
-            Route::get('{page}/{item}', [ItemController::class, 'show'])->name('public.item');
-            Route::get('{page}/{company}/{product}', [ProductController::class, 'show'])->name('public.product');
         });
     });
 });

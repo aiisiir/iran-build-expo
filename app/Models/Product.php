@@ -48,6 +48,6 @@ class Product extends Model
 
     public function path(): string
     {
-        return $this->company->path().'/'.$this->slug;
+        return "/{$this->company->language->code}/product/{$this->id}";
     }
 }

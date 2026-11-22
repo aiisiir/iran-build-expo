@@ -71,6 +71,6 @@ class Post extends Model
 
     public function path(): string
     {
-        return "/{$this->language->code}/{$this->page->slug}/{$this->slug}";
+        return "/{$this->language->code}/news/{$this->id}";
     }
 }

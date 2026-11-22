@@ -3,23 +3,20 @@
 namespace App\Http\Controllers\Public;
 
 use App\Models\Company;
-use App\Models\Page;
 use App\Models\Product;
 use App\Support\PublicRenderer;
 use Illuminate\Contracts\View\View;
 
+/** /{locale}/product/{id}; the product's company must be active and in the requested language. */
 class ProductController
 {
     public function __construct(private readonly PublicRenderer $renderer) {}
 
-    public function show(string $locale, string $page, string $company, string $product): View
+    public function show(string $locale, int $id): View
     {
-        $language = app('site.language');
-        $parent = Page::published()->where('language_id', $language->id)->where('slug', $page)->firstOrFail();
-        $owner = Company::where('language_id', $language->id)->where('slug', $company)->onPage($parent->id)->where('is_active', true)
-            ->orderByRaw('companies.page_id = ? desc', [$parent->id])->firstOrFail();
-        $item = Product::where('company_id', $owner->id)->where('slug', $product)->where('is_active', true)->firstOrFail();
+        $product = Product::where('is_active', true)->findOrFail($id);
+        $owner = Company::where('language_id', app('site.language')->id)->where('is_active', true)->findOrFail($product->company_id);
 
-        return $this->renderer->product($item->setRelation('company', $owner));
+        return $this->renderer->product($product->setRelation('company', $owner));
     }
 }

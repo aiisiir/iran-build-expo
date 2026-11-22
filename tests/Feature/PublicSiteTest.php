@@ -76,29 +76,31 @@ class PublicSiteTest extends TestCase
             ->assertSee('href="/en/about"', false);
     }
 
-    public function test_news_item_is_reachable_under_its_page_and_has_article_data(): void
+    public function test_news_item_is_reachable_by_type_and_id_and_has_article_data(): void
     {
         $news = $this->makePage('fa', ['title' => 'اخبار']);
         $post = $this->makePost($news, ['title' => 'خبر مهم', 'body' => '<p>متن خبر</p>']);
 
-        $this->get('/fa/'.rawurlencode('اخبار').'/'.rawurlencode('خبر-مهم'))
+        $this->get("/fa/news/{$post->id}")
             ->assertOk()->assertSee('متن خبر')->assertSee('NewsArticle', false)->assertSee('BreadcrumbList', false);
 
         $this->assertSame(1, $post->fresh()->view_count);
-        $this->get('/fa/'.rawurlencode('اخبار').'/'.rawurlencode('خبر-مهم'), ['User-Agent' => 'Googlebot'])->assertOk();
+        $this->get("/fa/news/{$post->id}", ['User-Agent' => 'Googlebot'])->assertOk();
         $this->assertSame(1, $post->fresh()->view_count);
+        $this->get("/en/news/{$post->id}")->assertNotFound();
+        $this->get('/fa/news/999999')->assertNotFound();
     }
 
     public function test_company_and_product_have_their_own_pages(): void
     {
         $list = $this->makePage('fa', ['title' => 'شرکت‌کنندگان', 'slug' => 'participants']);
         $company = Company::create(['language_id' => $list->language_id, 'page_id' => $list->id, 'name' => 'آجر پارس', 'industry' => 'مصالح']);
-        Product::create(['company_id' => $company->id, 'name' => 'آجر نسوز']);
-        Company::create(['language_id' => $list->language_id, 'page_id' => $list->id, 'name' => 'غیرفعال', 'is_active' => false]);
+        $product = Product::create(['company_id' => $company->id, 'name' => 'آجر نسوز']);
+        $inactive = Company::create(['language_id' => $list->language_id, 'page_id' => $list->id, 'name' => 'غیرفعال', 'is_active' => false]);
 
-        $this->get('/fa/participants/'.rawurlencode('آجر-پارس'))->assertOk()->assertSee('مصالح')->assertSee('آجر نسوز');
-        $this->get('/fa/participants/'.rawurlencode('آجر-پارس').'/'.rawurlencode('آجر-نسوز'))->assertOk()->assertSee('"@type":"Product"', false);
-        $this->get('/fa/participants/'.rawurlencode('غیرفعال'))->assertNotFound();
+        $this->get("/fa/company/{$company->id}")->assertOk()->assertSee('مصالح')->assertSee('آجر نسوز');
+        $this->get("/fa/product/{$product->id}")->assertOk()->assertSee('"@type":"Product"', false);
+        $this->get("/fa/company/{$inactive->id}")->assertNotFound();
     }
 
     public function test_public_pages_send_no_cookies(): void

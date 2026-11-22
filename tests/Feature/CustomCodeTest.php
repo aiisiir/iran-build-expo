@@ -48,14 +48,24 @@ class CustomCodeTest extends TestCase
         $this->get('/fa')->assertDontSee('/assets/custom.js', false);
     }
 
-    public function test_only_a_superadmin_can_grant_the_superadmin_role(): void
+    public function test_the_panel_never_grants_changes_or_deletes_a_superadmin(): void
     {
         $this->seedLanguages();
         $editor = $this->editor();
-        $this->actingAs($this->admin());
+        $super = $this->superAdmin();
+        $admin = $this->admin();
 
-        $this->put("/admin/r/users/{$editor->id}", ['name' => 'E', 'email' => $editor->email, 'role' => 'superadmin', 'is_active' => '1'])->assertSessionHasErrors('role');
+        foreach ([$admin, $super] as $actor) {
+            $this->actingAs($actor);
+            $this->put("/admin/r/users/{$editor->id}", ['name' => 'E', 'email' => $editor->email, 'role' => 'superadmin', 'is_active' => '1'])->assertSessionHasErrors('role');
+            $this->put("/admin/r/users/{$super->id}", ['name' => 'S', 'email' => $super->email, 'role' => 'editor', 'is_active' => '1'])->assertSessionHasErrors('role');
+        }
+
+        $this->actingAs($admin);
+        $this->delete("/admin/r/users/{$super->id}")->assertForbidden();
         $this->assertSame('editor', $editor->fresh()->role->value);
+        $this->assertSame('superadmin', $super->fresh()->role->value);
+        $this->assertNull($super->fresh()->deleted_at);
     }
 
     public function test_block_class_and_id_are_rendered_and_validated(): void

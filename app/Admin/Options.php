@@ -74,7 +74,13 @@ final class Options
 
     public static function roles(): array
     {
-        return ['superadmin' => 'مدیر ارشد (superadmin)', 'admin' => 'مدیر', 'editor' => 'ویراستار'];
+        return ['superadmin' => 'مدیر ارشد (superadmin)'] + self::panelRoles();
+    }
+
+    /** Roles the panel may hand out; "superadmin" is set directly in the database only. */
+    public static function panelRoles(): array
+    {
+        return ['admin' => 'مدیر', 'editor' => 'ویراستار'];
     }
 
     public static function categoryTypes(): array
