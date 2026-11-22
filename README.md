@@ -10,7 +10,7 @@
 - استقرار روی ساب‌دامین، بدون SSH: `docs/07-operations/deployment.md`.
 
 ## نصب محلی (XAMPP / PHP ≥ 8.4 و Composer)
-1. دیتابیس `iran_build_expo` را با collation `utf8mb4_unicode_ci` بساز (phpMyAdmin).
+1. دیتابیس `benis_fairs` را با collation `utf8mb4_unicode_ci` بساز (phpMyAdmin).
 2. در پوشهٔ پروژه:
 ```bash
 composer install

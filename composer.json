@@ -1,6 +1,6 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "iran-build-expo/platform",
+    "name": "benis-fairs/platform",
     "type": "project",
     "description": "Bilingual exhibition platform built with Laravel and Blade.",
     "keywords": [

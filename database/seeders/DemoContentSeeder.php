@@ -41,7 +41,7 @@ class DemoContentSeeder extends Seeder
         DB::transaction(function (): void {
             // The badge form only opens while a "current" exhibition edition exists.
             if (! Edition::current()) {
-                Edition::create(['code' => 'demo', 'name' => 'دورهٔ نمونه'])->claimFlag('is_current');
+                Edition::create(['code' => 'demo', 'name' => 'نمایشگاه بین‌المللی ساختمان ایران — دورهٔ نمونه'])->claimFlag('is_current');
             }
 
             foreach (['fa', 'en'] as $code) {

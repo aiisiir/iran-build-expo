@@ -35,7 +35,7 @@ class EditionResource extends Resource
     {
         return [
             Field::text('code', 'کد (مثل 1405)', ['required', 'string', 'max:30', Rule::unique('editions', 'code')->ignore($model?->id)]),
-            Field::text('name', 'نام داخلی', ['required', 'string', 'max:150']),
+            Field::text('name', 'نام روی کارت (نمایشگاه و دوره)', ['required', 'string', 'max:150']),
             Field::date('starts_on', 'شروع'),
             Field::date('ends_on', 'پایان'),
             Field::checkbox('is_current', 'دورهٔ جاری', false),
