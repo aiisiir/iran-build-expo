@@ -27,9 +27,6 @@ class SettingsController
     {
         $request->validate([
             'settings.*.*' => ['nullable', 'string', 'max:2000'],
-            // Local files only (the CSP allows media from this site alone).
-            'settings.*.home_video_url' => ['nullable', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'],
-            'settings.*.home_video_poster_url' => ['nullable', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'],
         ]);
 
         $language = Language::active()->firstWhere('id', (int) $request->input('language_id')) ?? abort(422);

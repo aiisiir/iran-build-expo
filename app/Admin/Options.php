@@ -90,7 +90,7 @@ final class Options
 
     public static function moduleTypes(): array
     {
-        return ['posts' => 'لیست خبر/اطلاعیه/پوستر', 'links' => 'لینک‌ها', 'content' => 'متن و تصویر', 'gallery' => 'گالری', 'faq' => 'پرسش‌های متداول', 'companies' => 'شرکت‌ها', 'embed' => 'تور سه‌بعدی'];
+        return ['posts' => 'لیست خبر/اطلاعیه/پوستر', 'links' => 'لینک‌ها', 'content' => 'متن و تصویر', 'gallery' => 'گالری', 'faq' => 'پرسش‌های متداول', 'companies' => 'شرکت‌ها', 'embed' => 'تور سه‌بعدی', 'about' => 'درباره (متن، ویدیو و ویژگی‌ها)'];
     }
 
     public static function displays(): array
@@ -105,7 +105,7 @@ final class Options
 
     public static function placements(): array
     {
-        return ['menu' => 'منوی اصلی', 'logo' => 'لوگو', 'quick_links' => 'دسترسی سریع', 'organizers' => 'برگزارکنندگان', 'supporters' => 'حامیان', 'footer' => 'فوتر'];
+        return ['menu' => 'منوی اصلی', 'logo' => 'لوگو', 'quick_links' => 'دسترسی سریع', 'organizers' => 'برگزارکنندگان', 'supporters' => 'حامیان', 'footer' => 'فوتر', 'footer_contact' => 'اطلاعات تماس فوتر'];
     }
 
     public static function targets(): array

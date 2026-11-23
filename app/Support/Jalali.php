@@ -20,6 +20,13 @@ final class Jalali
 
     private const MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
+    private const WEEKDAYS = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه']; // indexed by PHP's w (0 = Sunday)
+
+    public static function weekday(\DateTimeInterface $date): string
+    {
+        return self::WEEKDAYS[(int) $date->format('w')];
+    }
+
     /** @return array{0:int,1:int,2:int} [gy, gm, gd] */
     public static function toGregorian(int $jy, int $jm, int $jd): array
     {

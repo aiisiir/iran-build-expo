@@ -66,7 +66,7 @@ class PageLayoutController
         [$resource, $query] = match ($m->type) {
             ModuleType::Posts => ['posts', array_filter(['page_id' => $m->effectiveSourcePageId(), 'category_id' => $m->category_id])],
             ModuleType::Companies => ['companies', []],
-            ModuleType::Links => $m->link_group_id ? ['links', ['link_group_id' => $m->link_group_id]] : ['link-groups', []],
+            ModuleType::Links, ModuleType::About => $m->link_group_id ? ['links', ['link_group_id' => $m->link_group_id]] : ['link-groups', []],
             ModuleType::Faq => ['faqs', []],
             ModuleType::Gallery => $m->gallery_id ? ['gallery-items', ['gallery_id' => $m->gallery_id]] : ['galleries', []],
             default => [null, []],

@@ -13,6 +13,18 @@
             </article>
         @endforeach
     </div>
+@elseif (in_array('supporters-section', $classes, true))
+    <ul class="supporters-grid">
+        @foreach ($module->items as $link)
+            @php($href = $link->href())
+            <li class="supporter">
+                @if ($href)<a href="{{ $href }}" @if ($link->target === '_blank') target="_blank" rel="noopener noreferrer" @endif>@else<div>@endif
+                    <span class="supporter-logo">@if ($link->iconMedia)@include('public.partials.image', ['media' => $link->iconMedia, 'alt' => ''])@endif</span>
+                    <span class="supporter-name">{{ $link->label }}</span>
+                @if ($href)</a>@else</div>@endif
+            </li>
+        @endforeach
+    </ul>
 @else
     <ul @class(['link-list', 'slides' => $mode === 'slider', 'is-grid' => $mode !== 'list'])>
         @foreach ($module->items as $link)<li>@include('public.partials.link', ['link' => $link])</li>@endforeach

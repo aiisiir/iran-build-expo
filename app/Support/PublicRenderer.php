@@ -21,11 +21,9 @@ final class PublicRenderer
         $modules = $this->modules->load($page);
         // On the home page one posts module may be shown as the hero slider instead of a normal section.
         $hero = $page->is_home ? $modules->first(fn ($m) => $m->type->value === 'posts' && $m->display->value === 'hero') : null;
-        // Modules whose CSS class is "in-hero" / "in-about" are drawn inside the hero strip / the about panel, not as sections.
-        $inSlot = fn (string $slot) => $modules->filter(fn ($m) => in_array($slot, explode(' ', (string) $m->css_class), true))->values();
-        $utility = $page->is_home ? $inSlot('in-hero') : collect();
-        $features = $page->is_home ? $inSlot('in-about') : collect();
-        $modules = $modules->reject(fn ($m) => $m === $hero || $utility->contains($m) || $features->contains($m))->values();
+        // Modules whose CSS class is "in-hero" are drawn inside the hero strip, not as sections.
+        $utility = $page->is_home ? $modules->filter(fn ($m) => in_array('in-hero', explode(' ', (string) $m->css_class), true))->values() : collect();
+        $modules = $modules->reject(fn ($m) => $m === $hero || $utility->contains($m))->values();
         $versions = $this->versions($page);
         $name = $this->siteName($page->language);
         $path = $page->path();
@@ -41,7 +39,6 @@ final class PublicRenderer
             'modules' => $modules,
             'hero' => $hero?->items->take(4),
             'utility' => $utility,
-            'features' => $features,
             'tourUrl' => config('services.tour3d.url'),
             'breadcrumbs' => $breadcrumbs,
             'translations' => $this->switcher($versions),

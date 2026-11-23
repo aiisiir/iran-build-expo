@@ -21,6 +21,7 @@
         'layers' => '<path d="m12 2 10 6-10 6L2 8Zm-10 10 10 6 10-6M2 17l10 6 10-6"/>',
         'external' => '<path d="M14 3h7v7m0-7L10 14M10 3H3v18h18v-7"/>',
         'file' => '<path d="M14 2H4v20h16V8Zm0 0v6h6M8 12h8M8 16h8M8 19h5"/>',
+        'close' => '<path d="m6 6 12 12M18 6 6 18"/>',
         'zoom' => '<circle cx="10" cy="10" r="7"/><path d="m15 15 6 6M7 10h6m-3-3v6"/>',
         'broadcast' => '<path d="M5 18a10 10 0 1 1 14 0M8 15a6 6 0 1 1 8 0M12 12v9m-4 0h8"/><circle cx="12" cy="9" r="2"/>',
     ];

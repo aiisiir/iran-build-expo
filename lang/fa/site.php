@@ -17,6 +17,7 @@ return [
     'next' => 'بعدی',
     'previous' => 'قبلی',
     'close' => 'بستن',
+    'gallery' => 'گالری تصاویر',
     'tour_unavailable' => 'تور مجازی در دسترس نیست.',
     'footer_nav' => 'پیوندهای پایین صفحه',
     'pagination' => 'صفحه‌بندی',

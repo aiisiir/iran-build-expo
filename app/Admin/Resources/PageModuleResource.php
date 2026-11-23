@@ -57,7 +57,8 @@ class PageModuleResource extends Resource
             Field::select('link_group_id', 'گروه لینک', fn () => Options::linkGroups(), $optional('link_groups')),
             Field::select('gallery_id', 'گالری', fn () => Options::galleries(), $optional('galleries')),
             Field::media('media_id', 'تصویر (بلوک متن)', \App\Enums\MediaKind::Image, ['nullable', 'exists:media_assets,id']),
-            Field::rich('body', 'متن (بلوک متن)'),
+            Field::text('video_url', 'نشانی ویدیو (بلوک درباره)', ['nullable', 'string', 'max:255', 'regex:#^/(?!/)[A-Za-z0-9/_.-]+$#'], 'فقط فایل همین سایت، مثل /uploads/about.mp4؛ تصویر بلوک = پوستر ویدیو.'),
+            Field::rich('body', 'متن (بلوک متن و درباره)'),
             Field::text('css_class', 'کلاس CSS اختصاصی', ['nullable', 'string', 'max:120', 'regex:/^[A-Za-z_][A-Za-z0-9_\- ]*$/'], 'چند کلاس با فاصله؛ برای استایل‌دهی در «استایل اختصاصی».'),
             Field::text('css_id', 'شناسه (id) اختصاصی', ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z][A-Za-z0-9_\-]*$/'], 'یکتا در صفحه؛ برای لینک به همین بلوک (#id) یا استایل.'),
         ];

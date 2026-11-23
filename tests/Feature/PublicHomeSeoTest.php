@@ -90,18 +90,22 @@ class PublicHomeSeoTest extends TestCase
             ->assertDontSee('class="section module module-posts"', false);
     }
 
-    public function test_video_band_comes_from_settings_and_has_no_stop_button(): void
+    public function test_about_block_renders_text_video_and_feature_links(): void
     {
         $home = $this->makePage('fa', ['title' => 'خانه']);
         $home->claimFlag('is_home', ['language_id' => $home->language_id]);
-        \App\Support\SiteSettings::save($home->language_id, ['home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/video/atmosphere-poster.jpg']);
+        $group = \App\Models\LinkGroup::create(['language_id' => $home->language_id, 'placement' => 'quick_links', 'title' => 'ویژگی‌ها', 'is_active' => true]);
+        \App\Models\Link::create(['link_group_id' => $group->id, 'label' => 'گواهینامه‌ها', 'type' => 'url', 'url' => '/fa/x', 'is_active' => true]);
+        PageModule::create(['page_id' => $home->id, 'type' => 'about', 'title' => 'درباره ما', 'show_title' => true, 'display' => 'list', 'link_group_id' => $group->id,
+            'body' => '<p>متن درباره</p>', 'video_url' => '/video/atmosphere.mp4', 'css_class' => 'about-section', 'css_id' => 'about']);
 
         $html = $this->get('/fa')->assertOk()->getContent();
 
         $this->assertSame(1, substr_count($html, '<h1'));
         $this->assertStringContainsString('preload="none"', $html);
-        $this->assertStringContainsString('atmosphere-poster.jpg', $html);
-        $this->assertStringNotContainsString('data-atmosphere-toggle', $html);
+        $this->assertStringContainsString('/video/atmosphere.mp4', $html);
+        $this->assertStringContainsString('متن درباره', $html);
+        $this->assertStringContainsString('گواهینامه‌ها', $html);
     }
 
     public function test_language_switcher_lists_only_the_other_languages(): void

@@ -1,5 +1,5 @@
 @php
-    $title = $seo['title'] ?? config('app.name');
+    $title = $seo['title'] ?? ($site['site_name'] ?? 'Benis Fairs');
     $description = $seo['description'] ?? '';
     $canonical = $seo['canonical'] ?? url()->current();
     $alternates = $seo['alternates'] ?? [];
@@ -18,7 +18,7 @@
     <link rel="alternate" hreflang="x-default" href="{{ $seo['x_default'] }}">
 @endif
 <meta property="og:type" content="{{ $type }}">
-<meta property="og:site_name" content="{{ config('app.name') }}">
+<meta property="og:site_name" content="{{ ($site['site_name'] ?? 'Benis Fairs') }}">
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:url" content="{{ $canonical }}">
