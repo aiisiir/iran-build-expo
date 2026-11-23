@@ -67,7 +67,7 @@ class AdminPagesSmokeTest extends TestCase
         $this->actingAs($this->admin());
         $home = \App\Models\Page::where('is_home', 1)->firstOrFail();
 
-        $this->get("/admin/r/pages/{$home->id}/edit")->assertOk()->assertSee('ساختار صفحه')->assertSee('آخرین اخبار')->assertSee('href="/fa"', false);
+        $this->get("/admin/r/pages/{$home->id}/edit")->assertOk()->assertSee('ساختار صفحه')->assertSee('جدیدترین اخبار')->assertSee('href="/fa"', false);
         $this->get('/admin/r/pages')->assertOk()->assertSee('/fa');
         $this->get('/admin/ping')->assertNoContent();
     }

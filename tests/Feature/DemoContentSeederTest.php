@@ -17,32 +17,28 @@ class DemoContentSeederTest extends TestCase
         $this->seedLanguages();
         $this->seed(DemoContentSeeder::class);
 
-        foreach (['fa' => 'آخرین اخبار', 'en' => 'Latest news'] as $code => $latest) {
+        foreach (['fa' => 'جدیدترین اخبار', 'en' => 'Latest news'] as $code => $latest) {
             $html = $this->get("/{$code}")->assertOk()->assertSee($latest)->getContent();
 
             $this->assertSame(1, substr_count($html, 'aria-roledescription="slide"'), "hero slides ({$code})");
-            foreach (['class="hero"', 'quick-actions', 'about-panel', 'resources-section', 'news-section', 'registration-section', 'gallery-section', 'site-footer', 'id="primary-nav"'] as $marker) {
+            foreach (['class="hero"', 'quick-actions', 'in-hero', 'partners', 'supporters-slider', 'header-edition', 'footer-contact', 'data-lightbox', 'resources-section', 'news-section', 'registration-section', 'gallery-section', 'site-footer', 'id="primary-nav"'] as $marker) {
                 $this->assertStringContainsString($marker, $html, "{$marker} missing ({$code})");
             }
             $this->assertStringContainsString("/{$code}/badge", $html);
             $this->assertStringContainsString('class="brand-logo"', $html); // logo is a panel record
             $this->assertStringNotContainsString('Iran Build Expo', $html);
             $lang = $this->lang($code);
-            $this->assertSame(4, \App\Models\Post::where('language_id', $lang->id)->whereHas('category', fn ($q) => $q->where('name', $this->news($code)))->count());
-            $this->assertSame(6, \App\Models\Link::whereHas('group', fn ($q) => $q->where('language_id', $lang->id)->where('placement', 'supporters'))->whereNotNull('icon_media_id')->count());
-            $this->assertSame(4, \App\Models\Gallery::where('language_id', $lang->id)->has('items', '=', 10)->count());
+            $this->assertSame(6, \App\Models\Post::where('language_id', $lang->id)->whereHas('page', fn ($q) => $q->where('translation_key', 'news'))->count());
+            $this->assertSame(10, \App\Models\Link::whereHas('group', fn ($q) => $q->where('language_id', $lang->id)->where('placement', 'supporters'))->whereNotNull('icon_media_id')->count());
+            $this->assertSame(1, \App\Models\Gallery::where('language_id', $lang->id)->count());
+            $this->assertSame(10, \App\Models\GalleryItem::whereHas('gallery', fn ($q) => $q->where('language_id', $lang->id))->count());
         }
 
-        foreach (['اخبار', 'شرکت-ها', 'درباره-ما', 'تماس-با-ما'] as $slug) {
-            $this->get('/fa/'.rawurlencode($slug))->assertOk();
+        foreach (Page::where('status', 'published')->get() as $page) {
+            $this->get(\App\Support\PublicUrl::path($page->path()))->assertOk();
         }
         $post = \App\Models\Post::where('language_id', $this->lang('fa')->id)->firstOrFail();
         $this->get(\App\Support\PublicUrl::path($post->path()))->assertOk();
-    }
-
-    private function news(string $code): string
-    {
-        return $code === 'fa' ? 'اخبار' : 'News';
     }
 
     public function test_it_never_touches_a_database_that_already_has_pages(): void

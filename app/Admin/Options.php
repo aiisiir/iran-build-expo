@@ -90,7 +90,7 @@ final class Options
 
     public static function moduleTypes(): array
     {
-        return ['posts' => 'لیست خبر/اطلاعیه/پوستر', 'links' => 'لینک‌ها', 'content' => 'متن و تصویر', 'gallery' => 'گالری', 'faq' => 'پرسش‌های متداول', 'companies' => 'شرکت‌ها', 'embed' => 'تور سه‌بعدی', 'about' => 'درباره (متن، ویدیو و ویژگی‌ها)'];
+        return ['posts' => 'لیست خبر/اطلاعیه/پوستر', 'links' => 'لینک‌ها', 'content' => 'متن و تصویر', 'gallery' => 'گالری', 'faq' => 'پرسش‌های متداول', 'companies' => 'شرکت‌ها', 'embed' => 'تور سه‌بعدی', 'about' => 'متن'];
     }
 
     public static function displays(): array

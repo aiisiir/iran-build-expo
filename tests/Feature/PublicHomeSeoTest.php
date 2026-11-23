@@ -90,22 +90,39 @@ class PublicHomeSeoTest extends TestCase
             ->assertDontSee('class="section module module-posts"', false);
     }
 
-    public function test_about_block_renders_text_video_and_feature_links(): void
+    public function test_text_module_keeps_images_of_this_site(): void
     {
         $home = $this->makePage('fa', ['title' => 'خانه']);
         $home->claimFlag('is_home', ['language_id' => $home->language_id]);
-        $group = \App\Models\LinkGroup::create(['language_id' => $home->language_id, 'placement' => 'quick_links', 'title' => 'ویژگی‌ها', 'is_active' => true]);
-        \App\Models\Link::create(['link_group_id' => $group->id, 'label' => 'گواهینامه‌ها', 'type' => 'url', 'url' => '/fa/x', 'is_active' => true]);
-        PageModule::create(['page_id' => $home->id, 'type' => 'about', 'title' => 'درباره ما', 'show_title' => true, 'display' => 'list', 'link_group_id' => $group->id,
-            'body' => '<p>متن درباره</p>', 'video_url' => '/video/atmosphere.mp4', 'css_class' => 'about-section', 'css_id' => 'about']);
+        $src = url('uploads/inline/a.jpg');
+        PageModule::create(['page_id' => $home->id, 'type' => 'about', 'title' => 'متن', 'show_title' => true, 'display' => 'list',
+            'body' => '<p>متن آزمایشی</p><img src="'.$src.'" alt="x"><img src="https://evil.example/x.jpg" alt="y">']);
 
         $html = $this->get('/fa')->assertOk()->getContent();
 
-        $this->assertSame(1, substr_count($html, '<h1'));
-        $this->assertStringContainsString('preload="none"', $html);
-        $this->assertStringContainsString('/video/atmosphere.mp4', $html);
-        $this->assertStringContainsString('متن درباره', $html);
-        $this->assertStringContainsString('گواهینامه‌ها', $html);
+        $this->assertStringContainsString('متن آزمایشی', $html);
+        $this->assertStringContainsString($src, $html);
+        $this->assertStringNotContainsString('evil.example', $html);
+    }
+
+    public function test_supporters_become_a_slider_above_four(): void
+    {
+        $home = $this->makePage('fa', ['title' => 'خانه']);
+        $home->claimFlag('is_home', ['language_id' => $home->language_id]);
+        $make = function (string $placement, int $count) use ($home) {
+            $group = \App\Models\LinkGroup::create(['language_id' => $home->language_id, 'placement' => $placement, 'title' => $placement, 'is_active' => true]);
+            foreach (range(1, $count) as $i) {
+                \App\Models\Link::create(['link_group_id' => $group->id, 'label' => "نام {$placement} {$i}", 'type' => 'url', 'url' => '/fa/x', 'is_active' => true, 'sort_order' => $i]);
+            }
+
+            return $group;
+        };
+        PageModule::create(['page_id' => $home->id, 'type' => 'links', 'display' => 'auto', 'link_group_id' => $make('supporters', 5)->id]);
+
+        $html = $this->get('/fa')->assertOk()->getContent();
+
+        $this->assertStringContainsString('supporters-section', $html);
+        $this->assertStringContainsString('data-slider', $html);
     }
 
     public function test_language_switcher_lists_only_the_other_languages(): void

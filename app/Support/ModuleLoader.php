@@ -37,7 +37,7 @@ final class ModuleLoader
             ModuleType::Companies => Company::where('language_id', $page->language_id)->onPage($module->effectiveSourcePageId())->where('is_active', true)
                 ->with(['logo', 'page', 'language'])->orderBy('sort_order')->orderBy('name')->limit($limit)->get(),
             // A module without its own group/gallery shows the ones placed on this page.
-            ModuleType::Links, ModuleType::About => Link::whereIn('link_group_id', $module->link_group_id ? [$module->link_group_id] : LinkGroup::onPage($page->id)->pluck('id'))->whereNull('parent_id')->where('is_active', true)
+            ModuleType::Links => Link::whereIn('link_group_id', $module->link_group_id ? [$module->link_group_id] : LinkGroup::onPage($page->id)->pluck('id'))->whereNull('parent_id')->where('is_active', true)
                 ->whereHas('group', fn ($q) => $q->where('language_id', $page->language_id)->where('is_active', true))
                 ->with(['page.language', 'fileMedia', 'iconMedia'])->orderBy('sort_order')->get(),
             // A FAQ with no placement is shown everywhere; once placed, only on those pages.

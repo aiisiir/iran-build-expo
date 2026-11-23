@@ -28,7 +28,18 @@
     @if (($utility ?? collect())->isNotEmpty())
         <div class="container hero-utility">
             @foreach ($utility as $module)
-                @if ($module->type->value === 'links')
+                @if ($module->isOrganizers())
+                    {{-- One logo per link; the pill grows or shrinks with the number and size of the logos. --}}
+                    <div class="partners" role="group" @if ($module->title) aria-label="{{ $module->title }}" @endif>
+                        @foreach ($module->items as $link)
+                            @continue(! $link->iconMedia)
+                            @php($href = $link->href())
+                            @if ($href)<a class="partner" href="{{ $href }}" title="{{ $link->label }}" @if ($link->target === '_blank') target="_blank" rel="noopener noreferrer" @endif>@else<span class="partner" title="{{ $link->label }}">@endif
+                                @include('public.partials.image', ['media' => $link->iconMedia, 'alt' => $link->label])
+                            @if ($href)</a>@else</span>@endif
+                        @endforeach
+                    </div>
+                @elseif ($module->type->value === 'links')
                     <div class="quick-actions" role="group" @if ($module->title) aria-label="{{ $module->title }}" @endif>
                         @foreach ($module->items as $link)
                             @if ($href = $link->href())

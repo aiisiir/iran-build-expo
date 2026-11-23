@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['page_id', 'type', 'title', 'show_title', 'is_active', 'sort_order', 'display', 'item_limit', 'source_page_id', 'category_id', 'link_group_id', 'gallery_id', 'media_id', 'video_url', 'body', 'css_class', 'css_id'])]
+#[Fillable(['page_id', 'type', 'title', 'show_title', 'is_active', 'sort_order', 'display', 'item_limit', 'source_page_id', 'category_id', 'link_group_id', 'gallery_id', 'media_id', 'body', 'css_class', 'css_id'])]
 class PageModule extends Model
 {
     use Audited, SoftDeletes;
@@ -65,6 +65,19 @@ class PageModule extends Model
     public function effectiveDisplay(): string
     {
         return $this->display === ModuleDisplay::Auto ? ($this->items->count() >= 4 ? 'slider' : 'grid') : $this->display->value;
+    }
+
+    /** Supporters layout: chosen by the `supporters-section` CSS class or by a group placed as "supporters". */
+    public function isSupporters(): bool
+    {
+        return in_array('supporters-section', explode(' ', (string) $this->css_class), true)
+            || $this->linkGroup?->placement === \App\Enums\LinkPlacement::Supporters;
+    }
+
+    /** Organizer logos (hero strip pill): a links module whose group is placed as "organizers". */
+    public function isOrganizers(): bool
+    {
+        return $this->type->value === 'links' && $this->linkGroup?->placement === \App\Enums\LinkPlacement::Organizers;
     }
 
     /** Page whose records feed this module (defaults to the module's own page). */

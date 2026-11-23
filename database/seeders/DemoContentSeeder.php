@@ -207,6 +207,12 @@ class DemoContentSeeder extends Seeder
             $link($supporters, $name, null, $i + 1, null, ['type' => 'url', 'url' => null, 'icon_media_id' => $this->asset('supporter-'.($i + 1), 100, 100)->id]);
         }
 
+        // Organizers: one logo per link, drawn side by side in the white pill of the hero strip.
+        $organizers = $group('organizers', $t['partners'], 10, false);
+        foreach ($t['organizers_list'] as $i => $name) {
+            $link($organizers, $name, null, $i + 1, null, ['type' => 'url', 'url' => null, 'icon_media_id' => $this->asset('organizer-'.($i + 1), 120, 120)->id]);
+        }
+
         $footerA = $group('footer', $t['footer_a'], 5);
         foreach ([$archive, $about, $companies, $contact] as $i => $to) {
             $link($footerA, $t['footer_a_list'][$i], $to, $i + 1);
@@ -225,17 +231,13 @@ class DemoContentSeeder extends Seeder
 
         $module('posts', null, 'hero', 1);
         $module('links', $t['quick'], 'grid', 3, ['css_class' => 'in-hero', 'link_group_id' => $quick->id]);
-        $module('content', $t['partners'], 'grid', 1, ['css_class' => 'in-hero', 'media_id' => $this->asset('partners', 266, 66)->id]);
-        $module('about', $t['about_title'], 'list', 2, [
-            'css_class' => 'about-section', 'css_id' => 'about', 'link_group_id' => $features->id, 'body' => $t['about_text'],
-            'media_id' => $this->asset('about-live', 686, 460)->id, 'video_url' => '/video/atmosphere.mp4',
-        ]);
+        $module('links', $t['partners'], 'grid', 4, ['css_class' => 'in-hero', 'link_group_id' => $organizers->id]);
         $module('links', $t['docs_title'], 'grid', 3, ['css_class' => 'resources-section', 'link_group_id' => $docs->id, 'body' => $t['docs_intro']]);
         $module('posts', $t['news_title'], 'slider', 6, ['css_class' => 'news-section', 'source_page_id' => $news->id, 'body' => $t['news_intro']]);
         $module('content', $t['visitor_title'], 'grid', 1, ['css_class' => 'registration-section', 'media_id' => $this->asset('visitor-pass', 538, 438)->id, 'body' => $t['visitor_body']]);
         $module('gallery', $t['gallery_module'], 'grid', 10, ['css_class' => 'gallery-section', 'gallery_id' => $gallery->id, 'css_id' => 'gallery', 'body' => $t['gallery_intro']]);
 
-        $module('links', $t['supporters_title'], 'grid', 10, ['css_class' => 'supporters-section', 'link_group_id' => $supporters->id, 'body' => $t['supporters_intro']]);
+        $module('links', $t['supporters_title'], 'auto', 10, ['css_class' => 'supporters-section', 'link_group_id' => $supporters->id, 'body' => $t['supporters_intro']]);
 
         // Inner pages: the about page carries the FAQ.
         PageModule::create(['page_id' => $about->id, 'type' => 'faq', 'title' => $t['faq_title'], 'show_title' => true, 'display' => 'list', 'item_limit' => 8, 'sort_order' => 1, 'is_active' => true]);
@@ -280,7 +282,7 @@ class DemoContentSeeder extends Seeder
                 ['فولاد خوزستان', 'فولاد و ورق'], ['کاشی حافظ', 'کاشی و سرامیک'], ['کاشی سعدی', 'کاشی و سرامیک'], ['شیشه قزوین', 'شیشهٔ ساختمانی']],
             'gallery_title' => 'گالری نمایشگاه',
             'photos' => ['هنر قالیبافی؛ از تار تا پود', 'نمایی از سالن نمایشگاه', 'نقش و رنگ در فرش ایرانی', 'بازدید از آثار هنری', 'ظرافت هنر ایرانی', 'هنر دست و نقاشی روی سفال', 'بازدیدکنندگان در نمایشگاه', 'رنگ‌های قالی ایرانی', 'نمای بیرونی محل نمایشگاه', 'جزئیات بافت و نقش'],
-            'quick' => 'دسترسی سریع', 'quick_list' => [['سامانه ثبت نام', null], ['اخذ مجوز غرفه‌سازی', null], ['مشارکت‌کنندگان', null]], 'partners' => 'نشان‌های بین‌المللی نمایشگاهی',
+            'quick' => 'دسترسی سریع', 'quick_list' => [['سامانه ثبت نام', null], ['اخذ مجوز غرفه‌سازی', null], ['مشارکت‌کنندگان', null]], 'partners' => 'نشان‌های بین‌المللی نمایشگاهی', 'organizers_list' => ['اتاق بازرگانی ایران', 'سازمان نظام مهندسی ساختمان', 'اتحادیه جهانی صنعت نمایشگاهی (UFI)', 'ITE Group'],
             'features' => 'درباره ما', 'features_list' => [['گواهینامه‌ها', 'معرفی توانمندی‌های نمایشگاهی'], ['خدمات', 'خدمات تخصصی نمایشگاهی']],
             'docs' => 'مدارک', 'docs_title' => 'مدارک و اطلاعات کاربردی نمایشگاه',
             'docs_intro' => '<h3>اطلاعات نمایشگاه</h3><p>دسترسی سریع به لیست مشارکت‌کنندگان، نقشه محل برگزاری و پوستر رسمی نمایشگاه</p>',
@@ -330,7 +332,7 @@ class DemoContentSeeder extends Seeder
                 ['Khuzestan Steel', 'Steel and sheet'], ['Hafez Tile', 'Tiles and ceramics'], ['Saadi Tile', 'Tiles and ceramics'], ['Qazvin Glass', 'Architectural glass']],
             'gallery_title' => 'Exhibition gallery',
             'photos' => ['The art of carpet weaving', 'Inside the exhibition hall', 'Persian carpet patterns', 'Discovering craftsmanship', 'Persian decorative arts', 'Hand-painted ceramics', 'Visitors at the exhibition', 'The colours of Persian weaving', 'The exhibition venue', 'Details of a Persian carpet'],
-            'quick' => 'Quick actions', 'quick_list' => [['Visitor registration', null], ['Booth services', null], ['Exhibitors', null]], 'partners' => 'International exhibition marks',
+            'quick' => 'Quick actions', 'quick_list' => [['Visitor registration', null], ['Booth services', null], ['Exhibitors', null]], 'partners' => 'International exhibition marks', 'organizers_list' => ['Iran Chamber of Commerce', 'Building Engineering Organization', 'UFI – Global Association of the Exhibition Industry', 'ITE Group'],
             'features' => 'About us', 'features_list' => [['Credentials', 'Exhibition experience'], ['Our services', 'Specialist exhibition services']],
             'docs' => 'Documents', 'docs_title' => 'Everything you need for the exhibition',
             'docs_intro' => '<h3>Exhibition information</h3><p>Quick access to exhibitor information, the venue plan and exhibition artwork.</p>',
