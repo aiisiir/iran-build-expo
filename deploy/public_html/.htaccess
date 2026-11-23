@@ -1,0 +1,6 @@
+# Temporary smoke-test rules. Replaced by public/.htaccess at real deployment.
+Options -Indexes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^rewrite-test$ check.php?rewrite=1 [L]
+</IfModule>
