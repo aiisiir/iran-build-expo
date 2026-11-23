@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Cache;
 /** Per-language site texts (footer, site name, …) as key => value. Plain text only; always escaped on output. */
 final class SiteSettings
 {
+    /** Bump the version (v2 -> v3) whenever settings are changed directly in the DB. */
+    public const CACHE_PREFIX = 'settings.v2.';
+
     public const KEYS = [
         'site_name' => 'نام سایت',
         'tagline' => 'شعار (زیر نام سایت در هدر)',
@@ -31,7 +34,21 @@ final class SiteSettings
     /** @return array<string, string> */
     public static function for(int $languageId): array
     {
-        return Cache::rememberForever("settings.{$languageId}", fn () => Setting::where('language_id', $languageId)->pluck('value', 'key')->all());
+        $cacheKey = self::CACHE_PREFIX.$languageId;
+
+        $values = Cache::get($cacheKey);
+        if (is_array($values)) {
+            return $values;
+        }
+
+        $values = Setting::where('language_id', $languageId)->pluck('value', 'key')->all();
+
+        // Never cache an empty result, otherwise a not-yet-seeded table gets stuck forever.
+        if ($values !== []) {
+            Cache::forever($cacheKey, $values);
+        }
+
+        return $values;
     }
 
     public static function save(int $languageId, array $values): void
@@ -44,6 +61,6 @@ final class SiteSettings
                 : Setting::updateOrCreate(['language_id' => $languageId, 'key' => $key], ['value' => $value]);
         }
 
-        Cache::forget("settings.{$languageId}");
+        Cache::forget(self::CACHE_PREFIX.$languageId);
     }
 }
