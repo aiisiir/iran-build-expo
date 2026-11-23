@@ -26,14 +26,14 @@ use Illuminate\Support\Facades\DB;
  * Pictures: public/uploads/demo/{key}.webp|jpg|jpeg|png|svg is used when present (drop real photos there, see docs/content-guide.md);
  * otherwise a placeholder SVG is generated under that key. Company and supporter names are real Iranian building-industry firms used as pilot demo data
  * at the owner's request and responsibility (no logos are bundled: drop real ones under company-N / supporter-N). Dates and venues stay placeholders.
- * Refuses to run in production or on a database that already has pages, so real content is never touched.
+ * Refuses to run on a database that already has pages (any environment), so real content is never touched. Switch off with SEED_DEMO_CONTENT=false.
  */
 class DemoContentSeeder extends Seeder
 {
     public function run(): void
     {
-        if (app()->isProduction() || Page::withTrashed()->exists()) {
-            $this->command?->warn('Skipped: production or the database already has pages.');
+        if (Page::withTrashed()->exists()) {
+            $this->command?->warn('Skipped: the database already has pages.');
 
             return;
         }
@@ -41,7 +41,12 @@ class DemoContentSeeder extends Seeder
         DB::transaction(function (): void {
             // The badge form only opens while a "current" exhibition edition exists.
             if (! Edition::current()) {
-                Edition::create(['code' => 'demo', 'name' => 'نمایشگاه بین‌المللی ساختمان ایران — دورهٔ نمونه'])->claimFlag('is_current');
+                // Sample schedule: a Saturday three weeks ahead, three days, 10:00 to 18:00.
+                $start = now()->next('Saturday')->addWeeks(3)->startOfDay();
+                Edition::create([
+                    'code' => 'demo', 'name' => 'نمایشگاه بین‌المللی ساختمان ایران — دورهٔ نمونه', 'name_en' => 'Iran International Building Exhibition — sample edition',
+                    'starts_on' => $start, 'ends_on' => $start->copy()->addDays(3), 'hours' => '10:00 - 18:00',
+                ])->claimFlag('is_current');
             }
 
             foreach (['fa', 'en'] as $code) {
@@ -167,11 +172,11 @@ class DemoContentSeeder extends Seeder
 
         $menu = $group('menu', null, 1);
         foreach ([$home, $about, $exhibitors, $news, $archive, $services, $contact] as $i => $to) {
-            $link($menu, $to->title, $to, $i + 1);
+            $link($menu, $i === 0 ? $t['home_menu'] : $to->title, $to, $i + 1);
         }
         $link($menu, $t['badge'], null, 8, $badge, ['css_class' => 'button button--green nav-cta']);
 
-        // Quick actions in the hero strip (module class "in-hero") and the two links of the about panel ("in-about").
+        // Quick actions in the hero strip (module class "in-hero") and the feature links of the about block.
         $quick = $group('quick_links', $t['quick'], 2, false);
         foreach ($t['quick_list'] as $i => [$label]) {
             $to = [null, $exhibitors, $companies][$i];
@@ -187,6 +192,25 @@ class DemoContentSeeder extends Seeder
         foreach ($t['docs_list'] as $i => [$label, $text, $button]) {
             $doc = $this->asset('doc-'.($i + 1), 438, 290);
             $link($docs, $label, null, $i + 1, null, ['type' => 'file', 'file_media_id' => $doc->id, 'icon_media_id' => $doc->id, 'title_attr' => $button, 'css_class' => ['image', 'map', 'users'][$i], 'body' => "<p>{$text}</p>"]);
+        }
+
+        // Footer, right block: heading = group title, one row per link (icon = CSS class, detail = body).
+        $contactBox = $group('footer_contact', $t['settings']['site_name'], 4);
+        foreach ($t['footer_rows'] as $i => [$label, $detail, $icon]) {
+            $to = [$contact, $exhibitors, null][$i];
+            $link($contactBox, $label, $to, $i + 1, $to ? null : $badge, ['css_class' => $icon, 'body' => $detail ? "<p>{$detail}</p>" : null]);
+        }
+
+        // Ten supporters: logo = icon picture, label = name.
+        $supporters = $group('supporters', $t['supporters_title'], 9, false);
+        foreach ($t['supporters_list'] as $i => $name) {
+            $link($supporters, $name, null, $i + 1, null, ['type' => 'url', 'url' => null, 'icon_media_id' => $this->asset('supporter-'.($i + 1), 100, 100)->id]);
+        }
+
+        // Organizers: one logo per link, drawn side by side in the white pill of the hero strip.
+        $organizers = $group('organizers', $t['partners'], 10, false);
+        foreach ($t['organizers_list'] as $i => $name) {
+            $link($organizers, $name, null, $i + 1, null, ['type' => 'url', 'url' => null, 'icon_media_id' => $this->asset('organizer-'.($i + 1), 120, 120)->id]);
         }
 
         $footerA = $group('footer', $t['footer_a'], 5);
@@ -207,12 +231,13 @@ class DemoContentSeeder extends Seeder
 
         $module('posts', null, 'hero', 1);
         $module('links', $t['quick'], 'grid', 3, ['css_class' => 'in-hero', 'link_group_id' => $quick->id]);
-        $module('content', $t['partners'], 'grid', 1, ['css_class' => 'in-hero', 'media_id' => $this->asset('partners', 266, 66)->id]);
-        $module('links', $t['features'], 'grid', 2, ['css_class' => 'in-about', 'show_title' => false, 'link_group_id' => $features->id]);
+        $module('links', $t['partners'], 'grid', 4, ['css_class' => 'in-hero', 'link_group_id' => $organizers->id]);
         $module('links', $t['docs_title'], 'grid', 3, ['css_class' => 'resources-section', 'link_group_id' => $docs->id, 'body' => $t['docs_intro']]);
         $module('posts', $t['news_title'], 'slider', 6, ['css_class' => 'news-section', 'source_page_id' => $news->id, 'body' => $t['news_intro']]);
         $module('content', $t['visitor_title'], 'grid', 1, ['css_class' => 'registration-section', 'media_id' => $this->asset('visitor-pass', 538, 438)->id, 'body' => $t['visitor_body']]);
         $module('gallery', $t['gallery_module'], 'grid', 10, ['css_class' => 'gallery-section', 'gallery_id' => $gallery->id, 'css_id' => 'gallery', 'body' => $t['gallery_intro']]);
+
+        $module('links', $t['supporters_title'], 'auto', 10, ['css_class' => 'supporters-section', 'link_group_id' => $supporters->id, 'body' => $t['supporters_intro']]);
 
         // Inner pages: the about page carries the FAQ.
         PageModule::create(['page_id' => $about->id, 'type' => 'faq', 'title' => $t['faq_title'], 'show_title' => true, 'display' => 'list', 'item_limit' => 8, 'sort_order' => 1, 'is_active' => true]);
@@ -222,7 +247,7 @@ class DemoContentSeeder extends Seeder
     private function texts(): array
     {
         $fa = [
-            'home' => 'خانه', 'news' => 'اخبار', 'companies' => 'مشارکت‌کنندگان', 'about' => 'درباره ما', 'contact' => 'ارتباط با ما',
+            'home_menu' => 'صفحه نخست', 'home' => 'خانه', 'news' => 'اخبار', 'companies' => 'مشارکت‌کنندگان', 'about' => 'درباره ما', 'contact' => 'ارتباط با ما',
             'exhibitors' => 'ثبت نام مشارکت‌کنندگان', 'archive' => 'آرشیو دوره‌های قبل', 'services' => 'خدمات نمایشگاهی', 'badge' => 'سامانه ثبت نام',
             'about_body' => '<p>شرکت توسعه نمایشگاه‌های بین‌المللی بنیس در سال ۱۳۸۹ با هدف برگزاری رویدادهای تجاری من جمله نمایشگاه و کنفرانس، در سطوح ملی و بین‌المللی، در ایران تأسیس شد. این مجموعه با تکیه بر معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب موفق به برگزاری رویدادهای مختلفی در ایران و خارج از آن شده است.</p><h2>حوزه‌های فعالیت</h2><ul><li>برگزاری نمایشگاه: اطلاعات رویداد، مسیرهای مشارکت و برنامه‌ریزی برای حضور در نمایشگاه.</li><li>مشارکت در نمایشگاه: دسترسی به فرم ثبت درخواست، مدارک و اطلاعات نمایشگاه.</li><li>اخذ مجوز غرفه‌سازی: مسیر ثبت درخواست غرفه و بررسی اطلاعات موردنیاز مشارکت‌کننده.</li></ul>',
             'exhibitors_body' => '<p>برای مشارکت در نمایشگاه، اطلاعات شرکت و نیازهای غرفه‌ی خود را برای دبیرخانه ارسال کنید. این متن نمونه است و باید با راهنمای رسمی مشارکت جایگزین شود.</p>',
@@ -232,15 +257,17 @@ class DemoContentSeeder extends Seeder
             'sample' => 'این متن نمونه است و باید با محتوای رسمی جایگزین شود.',
             'meta' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها. اطلاعات نمایشگاه، اخبار، گالری و خدمات مشارکت‌کنندگان و بازدیدکنندگان.',
             'settings' => [
-                'site_name' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا', 'tagline' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS',
-                'header_contact_title' => 'همراه شما در مسیر برگزاری رویداد', 'header_contact_text' => 'برای اطلاع از رویدادها با ما در تماس باشید',
+                'site_name' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا', 'tagline' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها.',
-                'footer_about' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'footer_dates' => 'تاریخ برگزاری: به‌زودی اعلام می‌شود', 'footer_venue' => 'محل برگزاری: به‌زودی اعلام می‌شود',
-                'copyright' => 'کلیه حقوق این وب‌سایت متعلق به بنیس دیبا است.',
-                'home_video_title' => 'درباره ما',
-                'home_video_text' => 'شرکت توسعه نمایشگاه‌های بین‌المللی بنیس در سال ۱۳۸۹ با هدف برگزاری رویدادهای تجاری من جمله نمایشگاه و کنفرانس، در سطوح ملی و بین‌المللی، در ایران تأسیس شد. این مجموعه با تکیه بر معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب موفق به برگزاری رویدادهای مختلفی در ایران و خارج از آن شده است…',
-                'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
+                'footer_about' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها',
+                'copyright' => '© کلیه حقوق این وب‌سایت متعلق به بنیس دیبا است.',
             ],
+            'about_title' => 'درباره ما',
+            'about_text' => '<p>شرکت توسعه نمایشگاه‌های بین‌المللی بنیس در سال ۱۳۸۹ با هدف برگزاری رویدادهای تجاری من جمله نمایشگاه و کنفرانس، در سطوح ملی و بین‌المللی، در ایران تأسیس شد. این مجموعه با تکیه بر معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب موفق به برگزاری رویدادهای مختلفی در ایران و خارج از آن شده است…</p>',
+            'footer_rows' => [['ارتباط با دبیرخانه نمایشگاه', 'پاسخگویی به مشارکت‌کنندگان و بازدیدکنندگان', 'headset'], ['خدمات و ثبت‌نام مشارکت‌کنندگان', null, 'clipboard'], ['برنامه‌ریزی برای بازدید از نمایشگاه', null, 'users']],
+            'supporters_title' => 'همراهان و حامیان نمایشگاه',
+            'supporters_intro' => '<h3>حامیان</h3><p>سازمان‌ها و شرکت‌هایی که در برگزاری نمایشگاه ما را همراهی می‌کنند</p>',
+            'supporters_list' => ['وزارت راه و شهرسازی', 'سازمان نظام مهندسی ساختمان', 'بنیاد مسکن انقلاب اسلامی', 'شهرداری تهران', 'اتاق بازرگانی ایران', 'سیمان تهران', 'ذوب‌آهن اصفهان', 'فولاد مبارکه', 'گروه صنعتی سیمان فارس و خوزستان', 'کاشی و سرامیک اصفهان'],
             'categories' => ['خبر نمایشگاه', 'اطلاعیه', 'گزارش ویژه'],
             'hero' => ['برگزاری نمایشگاه‌ها', 'سمینارها و کنفرانس‌ها', 'معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب', 'سامانه ثبت نام'],
             'news_list' => [
@@ -255,11 +282,11 @@ class DemoContentSeeder extends Seeder
                 ['فولاد خوزستان', 'فولاد و ورق'], ['کاشی حافظ', 'کاشی و سرامیک'], ['کاشی سعدی', 'کاشی و سرامیک'], ['شیشه قزوین', 'شیشهٔ ساختمانی']],
             'gallery_title' => 'گالری نمایشگاه',
             'photos' => ['هنر قالیبافی؛ از تار تا پود', 'نمایی از سالن نمایشگاه', 'نقش و رنگ در فرش ایرانی', 'بازدید از آثار هنری', 'ظرافت هنر ایرانی', 'هنر دست و نقاشی روی سفال', 'بازدیدکنندگان در نمایشگاه', 'رنگ‌های قالی ایرانی', 'نمای بیرونی محل نمایشگاه', 'جزئیات بافت و نقش'],
-            'quick' => 'دسترسی سریع', 'quick_list' => [['سامانه ثبت نام', null], ['اخذ مجوز غرفه‌سازی', null], ['مشارکت‌کنندگان', null]], 'partners' => 'نشان‌های بین‌المللی نمایشگاهی',
+            'quick' => 'دسترسی سریع', 'quick_list' => [['سامانه ثبت نام', null], ['اخذ مجوز غرفه‌سازی', null], ['مشارکت‌کنندگان', null]], 'partners' => 'نشان‌های بین‌المللی نمایشگاهی', 'organizers_list' => ['اتاق بازرگانی ایران', 'سازمان نظام مهندسی ساختمان', 'اتحادیه جهانی صنعت نمایشگاهی (UFI)', 'ITE Group'],
             'features' => 'درباره ما', 'features_list' => [['گواهینامه‌ها', 'معرفی توانمندی‌های نمایشگاهی'], ['خدمات', 'خدمات تخصصی نمایشگاهی']],
             'docs' => 'مدارک', 'docs_title' => 'مدارک و اطلاعات کاربردی نمایشگاه',
             'docs_intro' => '<h3>اطلاعات نمایشگاه</h3><p>دسترسی سریع به لیست مشارکت‌کنندگان، نقشه محل برگزاری و پوستر رسمی نمایشگاه</p>',
-            'docs_list' => [['پوستر نمایشگاه', 'پوستر رسمی و اطلاع‌رسانی نمایشگاه', 'دانلود پوستر'], ['نقشه محل برگزاری', 'پلان غرفه‌ها و مسیرهای دسترسی به بخش‌های مختلف', 'دانلود نقشه'], ['لیست مشارکت‌کنندگان', 'فهرست کامل شرکت‌ها و برندهای حاضر در نمایشگاه', 'دانلود فایل']],
+            'docs_list' => [['پوستر نمایشگاه', 'پوستر رسمی و اطلاع‌رسانی نمایشگاه', 'دانلود پوستر (PDF)'], ['نقشه محل برگزاری', 'پلان غرفه‌ها و مسیرهای دسترسی به بخش‌های مختلف', 'دانلود نقشه (PDF)'], ['لیست مشارکت‌کنندگان', 'فهرست کامل شرکت‌ها و برندهای حاضر در نمایشگاه', 'دانلود فایل (PDF)']],
             'news_title' => 'جدیدترین اخبار و اطلاعیه‌های نمایشگاه', 'news_intro' => '<h3>آخرین اخبار</h3><p>رویدادها، اعلامیه‌ها و تازه‌ترین خبرهای مرتبط با نمایشگاه را دنبال کنید</p>',
             'visitor_title' => 'ثبت نام بازدیدکنندگان',
             'visitor_body' => '<h3>توسعه نمایشگاه‌های بین‌المللی بنیس دیبا</h3><h4>فرصتی برای دیدار، شناخت و ارتباط</h4><p>ثبت‌نام پیش از بازدید از نمایشگاه</p><p>برای حضور در نمایشگاه و آشنایی با آثار و مشارکت‌کنندگان،<br>اطلاعات بازدید خود را تکمیل کنید.</p><p><a href="/fa/badge">کلیک کنید</a></p>',
@@ -270,7 +297,7 @@ class DemoContentSeeder extends Seeder
             'faq' => [['چگونه درخواست مشارکت را آماده کنم؟', 'در بخش ثبت‌نام مشارکت‌کنندگان، اطلاعات فردی و مجموعه را وارد کنید.'], ['نقشه و مدارک نمایشگاه کجاست؟', 'در بخش «مدارک و اطلاعات» صفحه‌ی اصلی؛ پوستر، نقشه و فهرست مشارکت‌کنندگان.'], ['چگونه کارت بازدید بگیرم؟', 'از «سامانه ثبت نام» اطلاعات را وارد کنید و کارت خود را دریافت کنید.']],
         ];
         $en = [
-            'home' => 'Home', 'news' => 'News', 'companies' => 'Exhibitors', 'about' => 'About us', 'contact' => 'Contact',
+            'home_menu' => 'Home', 'home' => 'Home', 'news' => 'News', 'companies' => 'Exhibitors', 'about' => 'About us', 'contact' => 'Contact',
             'exhibitors' => 'Exhibitor registration', 'archive' => 'Previous editions', 'services' => 'Exhibition services', 'badge' => 'Register to visit',
             'about_body' => '<p>Benis International Exhibition Development was established in Iran in 2010 to organise trade events, exhibitions and conferences at national and international level. Its work brings together emerging markets, experienced organisers and exhibition communities.</p><h2>Areas of work</h2><ul><li>Organising exhibitions: event information, ways to take part and planning your presence.</li><li>Taking part: the application form, documents and exhibition information.</li><li>Stand-building permits: how to apply and what to prepare.</li></ul>',
             'exhibitors_body' => '<p>To take part in the exhibition, send your company details and stand requirements to the secretariat. Sample text: replace it with the official guide.</p>',
@@ -280,15 +307,17 @@ class DemoContentSeeder extends Seeder
             'sample' => 'Sample text. Replace it with official content.',
             'meta' => 'Benis Fairs: exhibitions, seminars and conferences. Exhibition information, news, gallery and services for exhibitors and visitors.',
             'settings' => [
-                'site_name' => 'Benis Fairs', 'tagline' => 'Exhibitions, seminars & conferences', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS',
-                'header_contact_title' => 'With you on the way to the event', 'header_contact_text' => 'Talk to our exhibition team',
+                'site_name' => 'Benis Fairs', 'tagline' => 'Exhibitions, seminars & conferences', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'Benis Fairs: exhibitions, seminars and conferences.',
-                'footer_about' => 'Bringing exhibitions, ideas and people together.', 'footer_dates' => 'Dates: to be announced', 'footer_venue' => 'Venue: to be announced',
+                'footer_about' => 'Bringing exhibitions, ideas and people together.',
                 'copyright' => '© All rights reserved for Benis Fairs.',
-                'home_video_title' => 'About Benis Fairs',
-                'home_video_text' => 'Benis International Exhibition Development was established in Iran in 2010 to organise trade events, exhibitions and conferences at national and international level. Its work brings together emerging markets, experienced organisers and exhibition communities.',
-                'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
             ],
+            'about_title' => 'About Benis Fairs',
+            'about_text' => '<p>Benis International Exhibition Development was established in Iran in 2010 to organise trade events, exhibitions and conferences at national and international level. Its work brings together emerging markets, experienced organisers and exhibition communities.</p>',
+            'footer_rows' => [['Contact the exhibition secretariat', 'Support for exhibitors and visitors', 'headset'], ['Exhibitor services and registration', null, 'clipboard'], ['Plan your visit to the exhibition', null, 'users']],
+            'supporters_title' => 'Partners and supporters',
+            'supporters_intro' => '<h3>Supporters</h3><p>The organisations and companies that stand with the exhibition.</p>',
+            'supporters_list' => ['Ministry of Roads and Urban Development', 'Building Engineering Organization', 'Housing Foundation', 'Tehran Municipality', 'Iran Chamber of Commerce', 'Tehran Cement', 'Esfahan Steel Company', 'Mobarakeh Steel', 'Fars & Khuzestan Cement Group', 'Esfahan Tile & Ceramic'],
             'categories' => ['Exhibition news', 'Announcement', 'Special report'],
             'hero' => ['International exhibitions', 'Seminars & conferences', 'Connecting local and international markets through an experienced team.', 'Register to visit'],
             'news_list' => [
@@ -303,11 +332,11 @@ class DemoContentSeeder extends Seeder
                 ['Khuzestan Steel', 'Steel and sheet'], ['Hafez Tile', 'Tiles and ceramics'], ['Saadi Tile', 'Tiles and ceramics'], ['Qazvin Glass', 'Architectural glass']],
             'gallery_title' => 'Exhibition gallery',
             'photos' => ['The art of carpet weaving', 'Inside the exhibition hall', 'Persian carpet patterns', 'Discovering craftsmanship', 'Persian decorative arts', 'Hand-painted ceramics', 'Visitors at the exhibition', 'The colours of Persian weaving', 'The exhibition venue', 'Details of a Persian carpet'],
-            'quick' => 'Quick actions', 'quick_list' => [['Visitor registration', null], ['Booth services', null], ['Exhibitors', null]], 'partners' => 'International exhibition marks',
+            'quick' => 'Quick actions', 'quick_list' => [['Visitor registration', null], ['Booth services', null], ['Exhibitors', null]], 'partners' => 'International exhibition marks', 'organizers_list' => ['Iran Chamber of Commerce', 'Building Engineering Organization', 'UFI – Global Association of the Exhibition Industry', 'ITE Group'],
             'features' => 'About us', 'features_list' => [['Credentials', 'Exhibition experience'], ['Our services', 'Specialist exhibition services']],
             'docs' => 'Documents', 'docs_title' => 'Everything you need for the exhibition',
             'docs_intro' => '<h3>Exhibition information</h3><p>Quick access to exhibitor information, the venue plan and exhibition artwork.</p>',
-            'docs_list' => [['Exhibition poster', 'Exhibition artwork and information', 'Download poster'], ['Venue floor plan', 'Stands, halls and access routes', 'Download map'], ['Exhibitor directory', 'Companies and brands at the exhibition', 'Download file']],
+            'docs_list' => [['Exhibition poster', 'Exhibition artwork and information', 'Download poster (PDF)'], ['Venue floor plan', 'Stands, halls and access routes', 'Download map (PDF)'], ['Exhibitor directory', 'Companies and brands at the exhibition', 'Download file (PDF)']],
             'news_title' => 'News and stories from the exhibition', 'news_intro' => '<h3>Latest news</h3><p>Follow exhibition stories, announcements and moments from the show.</p>',
             'visitor_title' => 'Visitor registration',
             'visitor_body' => '<h3>Benis International Exhibition Development</h3><h4>A place to meet, discover and connect</h4><p>Plan your exhibition visit</p><p>Explore the exhibition and its participants.<br>Prepare your visitor information in advance.</p><p><a href="/en/badge">Register to visit</a></p>',

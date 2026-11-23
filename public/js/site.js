@@ -88,15 +88,20 @@ document.querySelectorAll('[data-lightbox]').forEach((grid) => {
     const img = box.querySelector('img');
     const caption = box.querySelector('figcaption');
     const count = box.querySelector('.lb-count');
+    const figure = box.querySelector('figure');
     let current = 0; let opener = null;
 
-    const show = (index) => {
+    const show = (index, dir = 0) => {
         current = (index + links.length) % links.length;
         const link = links[current];
         img.src = link.href;
         img.alt = link.querySelector('img')?.alt || '';
         caption.textContent = link.dataset.caption || '';
         count.textContent = `${current + 1} / ${links.length}`;
+        // Restart the slide-in animation in the direction of travel.
+        figure.dataset.dir = String(dir);
+        figure.classList.remove('is-swap'); void figure.offsetWidth; figure.classList.add('is-swap');
+        [current + 1, current - 1].forEach((i) => { new Image().src = links[(i + links.length) % links.length].href; });
     };
     const open = (index, from) => {
         opener = from; box.hidden = false; show(index); box.showModal();
@@ -109,14 +114,33 @@ document.querySelectorAll('[data-lightbox]').forEach((grid) => {
     };
 
     links.forEach((link, i) => link.addEventListener('click', (e) => { e.preventDefault(); open(i, link); }));
-    box.querySelector('[data-lb-prev]').addEventListener('click', () => show(current - 1));
-    box.querySelector('[data-lb-next]').addEventListener('click', () => show(current + 1));
+    box.querySelector('[data-lb-prev]').addEventListener('click', () => show(current - 1, -1));
+    box.querySelector('[data-lb-next]').addEventListener('click', () => show(current + 1, 1));
     box.querySelector('[data-lb-close]').addEventListener('click', close);
     box.addEventListener('click', (e) => { if (e.target === box) close(); });
     box.addEventListener('cancel', (e) => { e.preventDefault(); close(); });
     box.addEventListener('keydown', (e) => {
         const rtl = getComputedStyle(box).direction === 'rtl';
-        if (e.key === 'ArrowLeft') show(current + (rtl ? 1 : -1));
-        if (e.key === 'ArrowRight') show(current + (rtl ? -1 : 1));
+        if (e.key === 'ArrowLeft') show(current + (rtl ? 1 : -1), rtl ? 1 : -1);
+        if (e.key === 'ArrowRight') show(current + (rtl ? -1 : 1), rtl ? -1 : 1);
+    });
+    // Swipe on touch screens: a horizontal drag of 50px or more moves to the neighbour picture.
+    let startX = null;
+    figure.addEventListener('pointerdown', (e) => { startX = e.clientX; });
+    figure.addEventListener('pointerup', (e) => {
+        if (startX !== null && Math.abs(e.clientX - startX) > 50) { const next = (e.clientX - startX < 0) === (getComputedStyle(box).direction !== 'rtl') ? 1 : -1; show(current + next, next); }
+        startX = null;
     });
 });
+
+// Scroll reveal: sections and cards rise into view once. Without IntersectionObserver or with reduced motion nothing is hidden.
+if ('IntersectionObserver' in window && !reduced.matches) {
+    const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) { entry.target.classList.add('is-in'); io.unobserve(entry.target); }
+    }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+    document.querySelectorAll('.section-heading, .about-panel, .resource-card, .news-carousel, .registration-panel, .gallery-photo, .supporter, .footer-grid > *').forEach((el) => {
+        const siblings = [...el.parentElement.children].filter((c) => c.matches('.resource-card, .gallery-photo, .supporter, .footer-grid > *'));
+        el.style.setProperty('--d', `${Math.max(siblings.indexOf(el), 0) * 70}ms`);
+        el.classList.add('reveal'); io.observe(el);
+    });
+}

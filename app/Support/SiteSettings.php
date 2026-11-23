@@ -14,21 +14,12 @@ final class SiteSettings
     public const KEYS = [
         'site_name' => 'نام سایت',
         'tagline' => 'شعار (زیر نام سایت در هدر)',
+        'brand_latin' => 'نام لاتین برند (فوتر، مثلاً Benis Fairs)',
         'brand_caption' => 'زیرنویس لوگو (انگلیسی، مثلاً INTERNATIONAL EXHIBITIONS)',
-        'header_contact_title' => 'هدر: عنوان بخش تماس',
-        'header_contact_text' => 'هدر: متن زیر عنوان تماس',
         'meta_description' => 'توضیح سئوی پیش‌فرض',
         'footer_about' => 'متن فوتر',
-        'footer_dates' => 'تاریخ برگزاری',
-        'footer_venue' => 'محل برگزاری',
-        'footer_address' => 'نشانی',
-        'footer_phone' => 'تلفن',
         'footer_email' => 'ایمیل',
         'copyright' => 'متن کپی‌رایت',
-        'home_video_title' => 'صفحهٔ اصلی: عنوان بخش «درباره ما»',
-        'home_video_text' => 'صفحهٔ اصلی: متن بخش «درباره ما»',
-        'home_video_url' => 'صفحهٔ اصلی: مسیر فایل ویدیو (مثل /uploads/x.mp4)',
-        'home_video_poster_url' => 'صفحهٔ اصلی: مسیر تصویر پوستر ویدیو',
     ];
 
     /** @return array<string, string> */

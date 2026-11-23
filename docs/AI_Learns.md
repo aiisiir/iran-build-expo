@@ -99,3 +99,11 @@
 - آدرس‌ها با پرچم نوع شیء: `/{lang}/news/{id}`، `/{lang}/company/{id}`، `/{lang}/product/{id}`، `/{lang}/gallery/{id}`؛ صفحه‌ها `/{lang}/{slug}`. این چهار واژه در `Slug::RESERVED` رزروند. آدرس همیشه یکتاست (canonical)، پس نمایش یک خبر زیر چند صفحه دیگر آدرس جدا ندارد.
 - `superadmin` فقط از دیتابیس (ستون `role`) تنظیم می‌شود: پنل نه می‌سازد، نه ارتقا/تنزل می‌دهد، نه حذف می‌کند (`Options::panelRoles()`، `UserResource`)؛ تست: `CustomCodeTest`.
 - محدودیت این نشست: Laravel/PHPUnit اجرا نشد (بدون vendor و شبکه)؛ بلید فقط با fixture ایستا و در کروم بررسی شد؛ فایرفاکس/وب‌کیت نبود.
+
+## Home-page conventions (2026-11-23)
+- `public/css/site.css` is hand-edited now (the old generator is retired): change it in small additive edits.
+- Supporters: a `links` module whose group is placed "supporters" (or class `supporters-section`) shows logo + name links; more than four items (display `auto`) become a scroll-snap slider driven by `[data-slider]`. A link may have a picture and no target.
+- Organizers: a `links` module with class `in-hero` whose group is placed "organizers" draws one logo per link side by side in the white `.partners` pill; the pill width follows the logos.
+- Module type `about` (value kept for stored data) is now the rich-text module labelled "متن": optional picture + sanitized HTML. The editor uploads pictures/files through `admin/media/quick`; `HtmlSanitizer` treats absolute URLs of this site (`APP_URL` host) as internal, other hosts' images are stripped.
+- `page_modules.video_url` is unused (kept to avoid touching migrated databases).
+- Seeder is on by default (`SEED_DEMO_CONTENT=true`); it reuses image files in `public/uploads/demo` by key name (`supporter-N`, `organizer-N`, …) and only creates placeholders for missing ones.

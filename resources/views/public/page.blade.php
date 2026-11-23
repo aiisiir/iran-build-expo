@@ -5,7 +5,6 @@
     @if ($page->is_home)
         <h1 class="sr-only">{{ $page->title }}</h1>
         @include('public.home.hero', ['hero' => $hero ?? null, 'utility' => $utility ?? collect()])
-        @include('public.home.about', ['features' => $features ?? collect()])
     @else
         <header class="page-head container"><h1>{{ $page->title }}</h1></header>
     @endif

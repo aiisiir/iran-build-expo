@@ -67,6 +67,19 @@ class PageModule extends Model
         return $this->display === ModuleDisplay::Auto ? ($this->items->count() >= 4 ? 'slider' : 'grid') : $this->display->value;
     }
 
+    /** Supporters layout: chosen by the `supporters-section` CSS class or by a group placed as "supporters". */
+    public function isSupporters(): bool
+    {
+        return in_array('supporters-section', explode(' ', (string) $this->css_class), true)
+            || $this->linkGroup?->placement === \App\Enums\LinkPlacement::Supporters;
+    }
+
+    /** Organizer logos (hero strip pill): a links module whose group is placed as "organizers". */
+    public function isOrganizers(): bool
+    {
+        return $this->type->value === 'links' && $this->linkGroup?->placement === \App\Enums\LinkPlacement::Organizers;
+    }
+
     /** Page whose records feed this module (defaults to the module's own page). */
     public function effectiveSourcePageId(): int
     {

@@ -2,6 +2,7 @@
 
 namespace App\View;
 
+use App\Models\Edition;
 use App\Models\Language;
 use App\Models\Link;
 use App\Models\LinkGroup;
@@ -17,7 +18,7 @@ class PublicLayoutComposer
         $language = app('site.language');
 
         $groups = LinkGroup::where('language_id', $language->id)->where('is_active', true)
-            ->whereIn('placement', ['menu', 'logo', 'footer'])->orderBy('sort_order')->get();
+            ->whereIn('placement', ['menu', 'logo', 'footer', 'footer_contact'])->orderBy('sort_order')->get();
 
         $links = Link::whereIn('link_group_id', $groups->modelKeys())->where('is_active', true)
             ->with(['page.language', 'fileMedia', 'iconMedia'])->orderBy('sort_order')->get()->groupBy('link_group_id');
@@ -29,6 +30,8 @@ class PublicLayoutComposer
             'site' => SiteSettings::for($language->id),
             'menuLinks' => $this->tree($links, $groups->firstWhere('placement.value', 'menu')),
             'logoLink' => $links->get($groups->firstWhere('placement.value', 'logo')?->id, collect())->first(),
+            'edition' => Edition::current(),
+            'footerContact' => ($contact = $groups->firstWhere('placement.value', 'footer_contact')) ? ['group' => $contact, 'links' => $this->tree($links, $contact)] : null,
             'footerGroups' => $groups->filter(fn ($g) => $g->placement->value === 'footer')
                 ->map(fn ($g) => ['group' => $g, 'links' => $this->tree($links, $g)]),
             'switcher' => Language::active()->reject(fn (Language $l) => $l->code === $language->code)

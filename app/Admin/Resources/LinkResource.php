@@ -70,7 +70,8 @@ class LinkResource extends Resource
     {
         $needs = ['page' => 'page_id', 'url' => 'url', 'file' => 'file_media_id'][$data['type']];
 
-        if (empty($data[$needs])) {
+        // A logo-only link (supporter, organizer) may have a picture and no target.
+        if (empty($data[$needs]) && empty($data['icon_media_id'])) {
             throw ValidationException::withMessages([$needs => 'برای این نوع لینک، این مورد لازم است.']);
         }
 

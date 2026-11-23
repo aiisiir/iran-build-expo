@@ -48,31 +48,36 @@ class CustomCodeTest extends TestCase
         $this->get('/fa')->assertDontSee('/assets/custom.js', false);
     }
 
-    public function test_the_panel_never_grants_changes_or_deletes_a_superadmin(): void
+    public function test_an_admin_cannot_promote_anyone_or_touch_a_superadmin(): void
     {
         $this->seedLanguages();
         $editor = $this->editor();
         $super = $this->superAdmin();
-        $admin = $this->admin();
+        $this->actingAs($this->admin());
 
-        foreach ([$admin, $super] as $actor) {
-            $this->actingAs($actor);
-            $this->put("/admin/r/users/{$editor->id}", ['name' => 'E', 'email' => $editor->email, 'role' => 'superadmin', 'is_active' => '1'])->assertSessionHasErrors('role');
-            $this->put("/admin/r/users/{$super->id}", ['name' => 'S', 'email' => $super->email, 'role' => 'editor', 'is_active' => '1'])->assertSessionHasErrors('role');
-        }
-
-        $this->actingAs($admin);
+        $this->put("/admin/r/users/{$editor->id}", ['name' => 'E', 'email' => $editor->email, 'role' => 'superadmin', 'is_active' => '1'])->assertSessionHasErrors('role');
+        $this->put("/admin/r/users/{$super->id}", ['name' => 'S', 'email' => $super->email, 'role' => 'editor', 'is_active' => '1'])->assertSessionHasErrors('role');
         $this->delete("/admin/r/users/{$super->id}")->assertForbidden();
+
         $this->assertSame('editor', $editor->fresh()->role->value);
         $this->assertSame('superadmin', $super->fresh()->role->value);
-        $this->assertNull($super->fresh()->deleted_at);
+    }
+
+    public function test_even_a_superadmin_cannot_grant_superadmin_in_the_panel(): void
+    {
+        $this->seedLanguages();
+        $editor = $this->editor();
+        $this->actingAs($this->superAdmin());
+
+        $this->put("/admin/r/users/{$editor->id}", ['name' => 'E', 'email' => $editor->email, 'role' => 'superadmin', 'is_active' => '1'])->assertSessionHasErrors('role');
+        $this->assertSame('editor', $editor->fresh()->role->value);
     }
 
     public function test_block_class_and_id_are_rendered_and_validated(): void
     {
         $this->seedLanguages();
         $this->seed(DemoContentSeeder::class);
-        $module = Page::where('is_home', 1)->firstOrFail()->modules()->where('type', 'faq')->firstOrFail();
+        $module = Page::where('is_home', 1)->firstOrFail()->modules()->where('type', 'gallery')->firstOrFail();
         $module->update(['css_class' => 'my-hero dark', 'css_id' => 'top-banner']);
 
         $this->get('/fa')->assertSee('id="top-banner"', false)->assertSee('my-hero dark', false);

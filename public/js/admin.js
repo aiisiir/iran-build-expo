@@ -220,8 +220,18 @@ window.addEventListener('DOMContentLoaded', () => {
             askBeforePasteHTML: false,
             askBeforePasteFromWord: false,
             defaultActionOnPaste: 'insert_clear_html',
-            uploader: { insertImageAsBase64URI: false },
-            buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'paragraph', 'ul', 'ol', 'align', '|', 'link', 'image', 'table', 'hr', '|', 'undo', 'redo', 'eraser', 'source'],
+            // Pictures and files go through the same upload endpoint as the media picker (CSRF header, JSON reply).
+            uploader: {
+                url: '/admin/media/quick',
+                format: 'json',
+                insertImageAsBase64URI: false,
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '' },
+                filesVariableName: () => 'file',
+                isSuccess: (r) => Boolean(r && r.url),
+                getMessage: (r) => (r && r.message) || '',
+                process: (r) => ({ files: [new URL(r.url, location.origin).pathname], path: '', baseurl: '', error: 0, msg: '', isImages: [Boolean(r.image)] }),
+            },
+            buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'paragraph', 'ul', 'ol', 'align', '|', 'link', 'image', 'file', 'table', 'hr', '|', 'undo', 'redo', 'eraser', 'source'],
         });
     });
 });

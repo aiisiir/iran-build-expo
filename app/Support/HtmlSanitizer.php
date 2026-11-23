@@ -52,6 +52,8 @@ final class HtmlSanitizer
         $config->set('HTML.TargetBlank', true);          // adds rel="noopener noreferrer"
         $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'tel' => true]);
         $config->set('URI.DisableExternalResources', true); // no hot-linked images (privacy + CSP)
+        // Absolute URLs of this very site (pasted from the editor's source view) are not "external", otherwise their <img> is stripped on save.
+        $config->set('URI.Host', parse_url((string) config('app.url'), PHP_URL_HOST) ?: null);
         $config->set('AutoFormat.RemoveEmpty', true);
 
         return self::$purifier = new HTMLPurifier($config);

@@ -62,8 +62,8 @@ code { background: #eef1f5; padding: .1rem .3rem; border-radius: 4px; }
 .nav-toggle { display: none; background: none; border: 1px solid var(--line); border-radius: 8px; width: 44px; height: 44px; font-size: 1.4rem; line-height: 1; cursor: pointer; color: var(--navy); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .nav-backdrop { position: fixed; inset: 0; background: rgba(10, 20, 35, .55); z-index: 40; }
-/* Phones and tablets: the side menu becomes a hamburger drawer, so the page never scrolls sideways. */
-@media (max-width: 960px) {
+/* Phones and small tablets only (up to 768px): the side menu becomes a hamburger drawer, so the page never scrolls sideways. Wider screens keep the fixed sidebar and never show the button. */
+@media (max-width: 768px) {
     body.admin { display: block; }
     .nav-toggle { display: inline-grid; place-items: center; }
     .sidebar { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, 86vw); z-index: 50; transform: translateX(100%); visibility: hidden; transition: transform .25s ease, visibility .25s; }

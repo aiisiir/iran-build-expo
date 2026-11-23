@@ -11,4 +11,5 @@ enum ModuleType: string
     case Faq = 'faq';
     case Companies = 'companies';
     case Embed = 'embed';
+    case About = 'about';
 }
