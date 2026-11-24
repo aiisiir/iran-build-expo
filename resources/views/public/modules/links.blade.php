@@ -14,8 +14,8 @@
         @endforeach
     </div>
 @elseif (in_array('supporters-section', $classes, true))
-    {{-- Logo + name links. More than four become a slider (or force it with display = slider / grid). --}}
-    @php($asSlider = $module->display === \App\Enums\ModuleDisplay::Slider || ($module->display === \App\Enums\ModuleDisplay::Auto && $module->items->count() > 4))
+    {{-- Logo + name links. More than four become a slider whatever the display setting says. --}}
+    @php($asSlider = $module->items->count() > 4)
     <div @class(['slider', 'supporters-slider' => $asSlider]) @if ($asSlider) data-slider @endif>
         <ul @class(['supporters-grid', 'slides' => $asSlider])>
             @foreach ($module->items as $link)

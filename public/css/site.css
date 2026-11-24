@@ -503,3 +503,74 @@ main > article.home { padding-bottom: 0; }
 /* Narrow phones: the brand text may wrap so the menu button never leaves the viewport. */
 .brand { min-width: 0; }
 .brand-copy { min-width: 0; }
+
+/* ===== Additions (supporters, organizers, header edition, gallery viewer, motion) ===== */
+/* Organizers: one logo per link side by side; the white pill follows the number and size of the logos.
+   (Overrides the single-image rules above, including `.hero-utility .partners img`.) */
+.partners, .hero-utility .partners { width: fit-content; max-width: 100%; padding-inline: 30px; display: flex; align-items: center; justify-content: center; gap: 18px; }
+.partner { display: flex; align-items: center; flex: none; transition: transform .25s; }
+.partner:is(a):hover { transform: translateY(-3px); }
+.partners img, .hero-utility .partners img { width: auto; height: 46px; max-width: 110px; object-fit: contain; }
+@media (max-width: 960px) { .partners, .hero-utility .partners { width: fit-content; padding-inline: 26px; gap: 15px; } .partners img, .hero-utility .partners img { height: 40px; max-width: 96px; } }
+@media (max-width: 740px) { .partners, .hero-utility .partners { width: fit-content; padding-inline: 18px; gap: 11px; } .partners img, .hero-utility .partners img { height: 30px; max-width: 70px; } }
+
+/* Header: the current edition (name, dates, hours) replaces the contact line of the reference. */
+.header-edition { max-width: 330px; align-items: center; }
+.header-edition span { align-items: flex-start; text-align: start; }
+.header-edition strong { line-height: 1.6; font-weight: 600; color: var(--blue); }
+.header-edition small { line-height: 1.6; }
+
+/* Supporters: ten logos in two rows. */
+.supporters-section { padding: 70px 0 84px; background: linear-gradient(180deg, #e7ebff, #f3f5ff); }
+.supporters-section .section-heading { margin-bottom: 34px; }
+.supporters-section .section-heading h2 { font-size: 30px; }
+.supporters-section .section-intro h3:before, .supporters-section .section-intro h3:after { content: ''; height: 2px; width: 45px; background: #7a9bef; margin-inline: 15px; }
+.supporters-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px; }
+.supporter > a, .supporter > div { display: flex; flex-direction: column; align-items: center; gap: 12px; height: 100%; padding: 22px 12px 16px; border: 3px solid #fff; border-radius: 23px; background: linear-gradient(140deg, #ffffff90, #f2efff70); box-shadow: 0 12px 26px #655ab524; text-align: center; transition: transform .3s var(--ease, ease), box-shadow .3s var(--ease, ease); }
+.supporter > a:hover { transform: translateY(-6px); box-shadow: 0 18px 34px #655ab53a; }
+.supporter-logo { width: 76px; height: 76px; border-radius: 20px; background: #fff; display: grid; place-items: center; overflow: hidden; box-shadow: inset 0 0 0 1px #dfe4f7; }
+.supporter-logo img { width: 100%; height: 100%; object-fit: contain; }
+.supporter-name { font-size: 13px; font-weight: 700; line-height: 1.7; color: var(--ink); }
+/* supporters slider: four logos per view, scroll-snap track driven by the shared [data-slider] script */
+.supporters-slider { padding-inline: 26px; }
+.supporters-slider .supporters-grid { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 4px 22px; }
+.supporters-slider .supporter { flex: 0 0 calc((100% - 54px) / 4); scroll-snap-align: start; }
+.supporters-slider .slider-btn { top: calc(50% - 8px); width: 40px; height: 40px; border-color: #7a9bef; background: #fff; color: #3d5bb8; }
+.supporters-slider .slider-btn.prev { inset-inline-start: -8px; } .supporters-slider .slider-btn.next { inset-inline-end: -8px; }
+@media (max-width: 960px) { .supporters-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .supporters-slider .supporter { flex-basis: calc((100% - 36px) / 3); } }
+@media (max-width: 740px) { .supporters-section { padding: 52px 0 60px; } .supporters-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; } .supporters-slider { padding-inline: 18px; } .supporters-slider .supporter { flex-basis: calc((100% - 12px) / 2); } .supporter-logo { width: 64px; height: 64px; } }
+
+/* Gallery viewer: icon buttons and a directional slide for each new picture. */
+.lb-close .icon, .lb-nav .icon { width: 22px; height: 22px; }
+.lb-prev .icon { transform: rotate(180deg); }
+dialog.lightbox figure.is-swap img { animation: lb-swap .38s var(--ease, ease) both; }
+dialog.lightbox figure[data-dir="1"].is-swap img { --from: 40px; }
+dialog.lightbox figure[data-dir="-1"].is-swap img { --from: -40px; }
+dialog.lightbox figure[data-dir="0"].is-swap img { --from: 0px; }
+@keyframes lb-swap { from { opacity: 0; transform: translateX(var(--from, 0)) scale(.97); } to { opacity: 1; transform: none; } }
+.gallery-photo { transition: transform .35s var(--ease, ease), box-shadow .35s var(--ease, ease); cursor: zoom-in; }
+.gallery-photo:hover { transform: translateY(-4px) scale(1.012); }
+.gallery-photo img { transition: transform .6s var(--ease, ease); }
+.gallery-photo:hover img { transform: scale(1.06); }
+
+/* Motion: sections rise into view once (added by site.js; skipped for reduced motion), cards and buttons respond to hover. */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease, ease), transform .7s var(--ease, ease); transition-delay: var(--d, 0ms); }
+.reveal.is-in { opacity: 1; transform: none; }
+.news-card, .resource-card, .quick-actions a, .about-links a { transition: transform .3s var(--ease, ease), box-shadow .3s var(--ease, ease), background-color .3s; }
+.news-card:hover, .resource-card:hover { transform: translateY(-6px); }
+.quick-actions a:hover { transform: translateY(-5px); }
+.about-links a:hover { transform: translateX(-4px); }
+.button, .btn, .nav-cta { transition: transform .25s var(--ease, ease), box-shadow .25s var(--ease, ease), background-color .25s; }
+.button:hover, .btn:hover, .nav-cta:hover { transform: translateY(-2px); }
+.primary-nav a { transition: color .2s; }
+.hero-copy > * { animation: rise .8s var(--ease, ease) both; }
+.hero-copy > *:nth-child(2) { animation-delay: .12s; } .hero-copy > *:nth-child(3) { animation-delay: .24s; } .hero-copy > *:nth-child(4) { animation-delay: .36s; }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } .hero-copy > * { animation: none; } .gallery-photo, .gallery-photo img, .news-card, .resource-card, .quick-actions a, .about-links a, .supporter > a { transition: none; } }
+
+/* Viewer picture fills the stage even when the source file is small; the counter reads 3 / 10 in both directions. */
+dialog.lightbox img { width: min(92vw, 1080px); height: auto; max-height: 74vh; object-fit: contain; background: #0e1b33; border: 4px solid #ffffffd9; box-shadow: 0 30px 80px #0008; }
+dialog.lightbox figcaption { padding: 8px 22px; border-radius: 99px; background: #ffffff1f; backdrop-filter: blur(6px); font-size: 14px; }
+dialog.lightbox figcaption:empty { display: none; }
+.lb-count { direction: ltr; unicode-bidi: isolate; pointer-events: none; }
+@media (max-width: 740px) { dialog.lightbox figure { padding: 4.5rem 1rem 3.5rem; } .lb-nav { top: auto; bottom: .8rem; transform: none; } .lb-prev { inset-inline-start: 1rem; } .lb-next { inset-inline-end: 1rem; } }
