@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 final class SiteSettings
 {
     /** Bump the version (v2 -> v3) whenever settings are changed directly in the DB. */
-    public const CACHE_PREFIX = 'settings.v2.';
+    public const CACHE_PREFIX = 'settings.v3.';
 
     public const KEYS = [
         'site_name' => 'نام سایت',
