@@ -1,0 +1,24 @@
+<?php
+
+return [
+    'skip' => 'پرش به محتوا',
+    'menu' => 'منو',
+    'main_nav' => 'منوی اصلی',
+    'languages' => 'زبان‌ها',
+    'breadcrumb' => 'مسیر صفحه',
+    'read_more' => 'ادامهٔ مطلب',
+    'view_all' => 'مشاهدهٔ همه اخبار',
+    'read_story' => 'مشاهدهٔ خبر',
+    'download' => 'دانلود فایل',
+    'published' => 'انتشار',
+    'source' => 'منبع',
+    'products' => 'محصولات',
+    'prev' => 'قبلی',
+    'next' => 'بعدی',
+    'previous' => 'قبلی',
+    'close' => 'بستن',
+    'gallery' => 'گالری تصاویر',
+    'tour_unavailable' => 'تور مجازی در دسترس نیست.',
+    'footer_nav' => 'پیوندهای پایین صفحه',
+    'pagination' => 'صفحه‌بندی',
+];
