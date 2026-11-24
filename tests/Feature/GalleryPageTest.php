@@ -22,7 +22,8 @@ class GalleryPageTest extends TestCase
             ->assertSee('<link rel="canonical" href="'.\App\Support\PublicUrl::absolute($gallery->path()).'">', false);
         $this->assertSame($gallery->items->count(), substr_count($this->get($gallery->path())->getContent(), 'data-caption='));
 
-        $this->get('/'.$gallery->language->code)->assertSee('href="'.url($gallery->path()).'"', false);
+        // Home tiles open the lightbox on the photo itself instead of linking to the gallery page.
+        $this->get('/'.$gallery->language->code)->assertSee('data-lightbox', false);
         $this->get('/fa/gallery/999999')->assertNotFound();
         $this->app['env'] = 'production';
         config(['app.indexable' => true]);
