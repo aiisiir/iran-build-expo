@@ -231,6 +231,7 @@ class DemoContentSeeder extends Seeder
 
         $module('posts', null, 'hero', 1);
         $module('links', $t['quick'], 'grid', 3, ['css_class' => 'in-hero', 'link_group_id' => $quick->id]);
+        $module('links', $t['features'], 'grid', 2, ['css_class' => 'in-about', 'show_title' => false, 'link_group_id' => $features->id]);
         $module('links', $t['partners'], 'grid', 4, ['css_class' => 'in-hero', 'link_group_id' => $organizers->id]);
         $module('links', $t['docs_title'], 'grid', 3, ['css_class' => 'resources-section', 'link_group_id' => $docs->id, 'body' => $t['docs_intro']]);
         $module('posts', $t['news_title'], 'slider', 6, ['css_class' => 'news-section', 'source_page_id' => $news->id, 'body' => $t['news_intro']]);
@@ -257,6 +258,9 @@ class DemoContentSeeder extends Seeder
             'sample' => 'این متن نمونه است و باید با محتوای رسمی جایگزین شود.',
             'meta' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها. اطلاعات نمایشگاه، اخبار، گالری و خدمات مشارکت‌کنندگان و بازدیدکنندگان.',
             'settings' => [
+                'home_video_title' => 'درباره ما',
+                'home_video_text' => 'شرکت توسعه نمایشگاه‌های بین‌المللی بنیس در سال ۱۳۸۹ با هدف برگزاری رویدادهای تجاری من جمله نمایشگاه و کنفرانس، در سطوح ملی و بین‌المللی، در ایران تأسیس شد. این مجموعه با تکیه بر معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب موفق به برگزاری رویدادهای مختلفی در ایران و خارج از آن شده است…',
+                'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
                 'site_name' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا', 'tagline' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها.',
                 'footer_about' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها',
@@ -307,6 +311,9 @@ class DemoContentSeeder extends Seeder
             'sample' => 'Sample text. Replace it with official content.',
             'meta' => 'Benis Fairs: exhibitions, seminars and conferences. Exhibition information, news, gallery and services for exhibitors and visitors.',
             'settings' => [
+                'home_video_title' => 'About Benis Fairs',
+                'home_video_text' => 'Benis International Exhibition Development was established in Iran in 2010 to organise trade events, exhibitions and conferences at national and international level. Its work brings together emerging markets, experienced organisers and exhibition communities.',
+                'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
                 'site_name' => 'Benis Fairs', 'tagline' => 'Exhibitions, seminars & conferences', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'Benis Fairs: exhibitions, seminars and conferences.',
                 'footer_about' => 'Bringing exhibitions, ideas and people together.',

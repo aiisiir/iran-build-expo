@@ -21,7 +21,7 @@ class DemoContentSeederTest extends TestCase
             $html = $this->get("/{$code}")->assertOk()->assertSee($latest)->getContent();
 
             $this->assertSame(1, substr_count($html, 'aria-roledescription="slide"'), "hero slides ({$code})");
-            foreach (['class="hero"', 'quick-actions', 'partners', 'supporters-slider', 'header-edition', 'footer-contact', 'data-lightbox', 'resources-section', 'news-section', 'registration-section', 'gallery-section', 'site-footer', 'id="primary-nav"'] as $marker) {
+            foreach (['class="hero"', 'quick-actions', 'about-panel', 'partners', 'supporters-slider', 'header-edition', 'footer-contact', 'data-lightbox', 'resources-section', 'news-section', 'registration-section', 'gallery-section', 'site-footer', 'id="primary-nav"'] as $marker) {
                 $this->assertStringContainsString($marker, $html, "{$marker} missing ({$code})");
             }
             $this->assertStringContainsString("/{$code}/badge", $html);

@@ -23,7 +23,9 @@ final class PublicRenderer
         $hero = $page->is_home ? $modules->first(fn ($m) => $m->type->value === 'posts' && $m->display->value === 'hero') : null;
         // Modules whose CSS class is "in-hero" are drawn inside the hero strip, not as sections.
         $utility = $page->is_home ? $modules->filter(fn ($m) => $m->isOrganizers() || in_array('in-hero', explode(' ', (string) $m->css_class), true))->values() : collect();
-        $modules = $modules->reject(fn ($m) => $m === $hero || $utility->contains($m))->values();
+        // "in-about" modules are the feature links inside the About panel (its text and video come from the site settings).
+        $features = $page->is_home ? $modules->filter(fn ($m) => in_array('in-about', explode(' ', (string) $m->css_class), true))->values() : collect();
+        $modules = $modules->reject(fn ($m) => $m === $hero || $utility->contains($m) || $features->contains($m))->values();
         $versions = $this->versions($page);
         $name = $this->siteName($page->language);
         $path = $page->path();
@@ -39,6 +41,7 @@ final class PublicRenderer
             'modules' => $modules,
             'hero' => $hero?->items->take(4),
             'utility' => $utility,
+            'features' => $features,
             'tourUrl' => config('services.tour3d.url'),
             'breadcrumbs' => $breadcrumbs,
             'translations' => $this->switcher($versions),

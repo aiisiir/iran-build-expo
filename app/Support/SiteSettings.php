@@ -20,6 +20,10 @@ final class SiteSettings
         'footer_about' => 'متن فوتر',
         'footer_email' => 'ایمیل',
         'copyright' => 'متن کپی‌رایت',
+        'home_video_title' => 'صفحهٔ اصلی: عنوان بخش «درباره ما»',
+        'home_video_text' => 'صفحهٔ اصلی: متن بخش «درباره ما»',
+        'home_video_url' => 'صفحهٔ اصلی: مسیر فایل ویدیو (مثل /uploads/x.mp4)',
+        'home_video_poster_url' => 'صفحهٔ اصلی: مسیر تصویر پوستر ویدیو',
     ];
 
     /** @return array<string, string> */
