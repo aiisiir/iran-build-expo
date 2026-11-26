@@ -15,7 +15,7 @@ if (($installed['dev'] ?? true) !== false) {
 }
 
 // Top-level entries that never ship; public/ is mapped to public_html/ separately.
-$skipTop = ['.git', '.github', '.idea', '.vscode', 'tests', 'docs', 'deploy', 'node_modules', 'scripts', 'public', 'release.zip', '.phpunit.cache'];
+$skipTop = ['.git', '.github', '.idea', '.vscode', 'tests', 'docs', 'deploy', 'node_modules', 'scripts', 'public', 'db', '.phpunit.cache'];
 $emptyDirs = ['storage/app/private', 'storage/app/public', 'storage/framework/cache/data', 'storage/framework/sessions', 'storage/framework/views', 'storage/logs', 'bootstrap/cache'];
 
 $zip = new ZipArchive;
@@ -42,6 +42,7 @@ $files = $add($root, 'app/', function (string $rel) use ($skipTop): bool {
     $top = explode('/', str_replace('\\', '/', $rel))[0];
 
     return in_array($top, $skipTop, true)
+        || preg_match('#^[^/]+\.(zip|sql)$#i', $rel) // release zips and SQL dumps lying in the project root
         || preg_match('#(^|/)\.env(\..*)?$#', $rel) && ! str_ends_with($rel, '.example')
         || preg_match('#^storage/(logs|framework/(cache|sessions|views|testing))/.#', $rel)
         || preg_match('#^storage/app/(private|public)/.#', $rel)

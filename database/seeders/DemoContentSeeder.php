@@ -194,13 +194,6 @@ class DemoContentSeeder extends Seeder
             $link($docs, $label, null, $i + 1, null, ['type' => 'file', 'file_media_id' => $doc->id, 'icon_media_id' => $doc->id, 'title_attr' => $button, 'css_class' => ['image', 'map', 'users'][$i], 'body' => "<p>{$text}</p>"]);
         }
 
-        // Footer, right block: heading = group title, one row per link (icon = CSS class, detail = body).
-        $contactBox = $group('footer_contact', $t['settings']['site_name'], 4);
-        foreach ($t['footer_rows'] as $i => [$label, $detail, $icon]) {
-            $to = [$contact, $exhibitors, null][$i];
-            $link($contactBox, $label, $to, $i + 1, $to ? null : $badge, ['css_class' => $icon, 'body' => $detail ? "<p>{$detail}</p>" : null]);
-        }
-
         // Ten supporters: logo = icon picture, label = name.
         $supporters = $group('supporters', $t['supporters_title'], 9, false);
         foreach ($t['supporters_list'] as $i => $name) {
@@ -263,12 +256,11 @@ class DemoContentSeeder extends Seeder
                 'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
                 'site_name' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا', 'tagline' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'توسعه نمایشگاه‌های بین‌المللی بنیس دیبا؛ برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها.',
-                'footer_about' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها',
+                'footer_about' => 'برگزاری نمایشگاه‌ها، سمینارها و کنفرانس‌ها', 'footer_dates' => 'تاریخ برگزاری: به‌زودی اعلام می‌شود', 'footer_venue' => 'محل برگزاری: به‌زودی اعلام می‌شود',
                 'copyright' => '© کلیه حقوق این وب‌سایت متعلق به بنیس دیبا است.',
             ],
             'about_title' => 'درباره ما',
             'about_text' => '<p>شرکت توسعه نمایشگاه‌های بین‌المللی بنیس در سال ۱۳۸۹ با هدف برگزاری رویدادهای تجاری من جمله نمایشگاه و کنفرانس، در سطوح ملی و بین‌المللی، در ایران تأسیس شد. این مجموعه با تکیه بر معرفی بازارهای مستعد داخلی و خارجی و با بهره‌گیری از کادری مجرب موفق به برگزاری رویدادهای مختلفی در ایران و خارج از آن شده است…</p>',
-            'footer_rows' => [['ارتباط با دبیرخانه نمایشگاه', 'پاسخگویی به مشارکت‌کنندگان و بازدیدکنندگان', 'headset'], ['خدمات و ثبت‌نام مشارکت‌کنندگان', null, 'clipboard'], ['برنامه‌ریزی برای بازدید از نمایشگاه', null, 'users']],
             'supporters_title' => 'همراهان و حامیان نمایشگاه',
             'supporters_intro' => '<h3>حامیان</h3><p>سازمان‌ها و شرکت‌هایی که در برگزاری نمایشگاه ما را همراهی می‌کنند</p>',
             'supporters_list' => ['وزارت راه و شهرسازی', 'سازمان نظام مهندسی ساختمان', 'بنیاد مسکن انقلاب اسلامی', 'شهرداری تهران', 'اتاق بازرگانی ایران', 'سیمان تهران', 'ذوب‌آهن اصفهان', 'فولاد مبارکه', 'گروه صنعتی سیمان فارس و خوزستان', 'کاشی و سرامیک اصفهان'],
@@ -316,12 +308,11 @@ class DemoContentSeeder extends Seeder
                 'home_video_url' => '/video/atmosphere.mp4', 'home_video_poster_url' => '/uploads/demo/gallery-1-2.webp',
                 'site_name' => 'Benis Fairs', 'tagline' => 'Exhibitions, seminars & conferences', 'brand_caption' => 'INTERNATIONAL EXHIBITIONS', 'brand_latin' => 'Benis Fairs',
                 'meta_description' => 'Benis Fairs: exhibitions, seminars and conferences.',
-                'footer_about' => 'Bringing exhibitions, ideas and people together.',
+                'footer_about' => 'Bringing exhibitions, ideas and people together.', 'footer_dates' => 'Dates: to be announced', 'footer_venue' => 'Venue: to be announced',
                 'copyright' => '© All rights reserved for Benis Fairs.',
             ],
             'about_title' => 'About Benis Fairs',
             'about_text' => '<p>Benis International Exhibition Development was established in Iran in 2010 to organise trade events, exhibitions and conferences at national and international level. Its work brings together emerging markets, experienced organisers and exhibition communities.</p>',
-            'footer_rows' => [['Contact the exhibition secretariat', 'Support for exhibitors and visitors', 'headset'], ['Exhibitor services and registration', null, 'clipboard'], ['Plan your visit to the exhibition', null, 'users']],
             'supporters_title' => 'Partners and supporters',
             'supporters_intro' => '<h3>Supporters</h3><p>The organisations and companies that stand with the exhibition.</p>',
             'supporters_list' => ['Ministry of Roads and Urban Development', 'Building Engineering Organization', 'Housing Foundation', 'Tehran Municipality', 'Iran Chamber of Commerce', 'Tehran Cement', 'Esfahan Steel Company', 'Mobarakeh Steel', 'Fars & Khuzestan Cement Group', 'Esfahan Tile & Ceramic'],

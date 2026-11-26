@@ -56,11 +56,13 @@
     <footer class="site-footer">
         <div class="container footer-grid">
             <div class="footer-contact">
-                <h2><x-icon name="building" />{{ $footerContact['group']->title ?? $siteName }}</h2>
+                <h2><x-icon name="building" />{{ $siteName }}</h2>
                 @isset($site['footer_about'])<p>{{ $site['footer_about'] }}</p>@endisset
-                @foreach (($footerContact['links'] ?? collect())->get(0, collect()) as $link)
-                    @php($href = $link->href())
-                    @if ($href)<a href="{{ $href }}">@include('public.partials.footer-row')</a>@else<div class="footer-line">@include('public.partials.footer-row')</div>@endif
+                @isset($site['footer_phone'])<a href="tel:{{ preg_replace('/[^\d+]/', '', $site['footer_phone']) }}"><x-icon name="phone" /><span dir="ltr">{{ $site['footer_phone'] }}</span></a>@endisset
+                @isset($site['footer_email'])<a href="mailto:{{ $site['footer_email'] }}"><x-icon name="mail" /><span dir="ltr">{{ $site['footer_email'] }}</span></a>@endisset
+                @isset($site['footer_address'])<div class="footer-line"><x-icon name="location" /><span>{{ $site['footer_address'] }}</span></div>@endisset
+                @foreach (['footer_dates' => 'calendar', 'footer_venue' => 'map'] as $key => $icon)
+                    @isset($site[$key])<div class="footer-line"><x-icon :name="$icon" /><span>{{ $site[$key] }}</span></div>@endisset
                 @endforeach
             </div>
             @foreach ($footerGroups as $entry)

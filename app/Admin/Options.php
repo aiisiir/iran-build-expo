@@ -105,7 +105,7 @@ final class Options
 
     public static function placements(): array
     {
-        return ['menu' => 'منوی اصلی', 'logo' => 'لوگو', 'quick_links' => 'دسترسی سریع', 'organizers' => 'برگزارکنندگان', 'supporters' => 'حامیان', 'footer' => 'فوتر', 'footer_contact' => 'اطلاعات تماس فوتر'];
+        return ['menu' => 'منوی اصلی', 'logo' => 'لوگو', 'quick_links' => 'دسترسی سریع', 'organizers' => 'برگزارکنندگان', 'supporters' => 'حامیان', 'footer' => 'فوتر'];
     }
 
     public static function targets(): array

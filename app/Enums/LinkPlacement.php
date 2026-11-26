@@ -10,5 +10,4 @@ enum LinkPlacement: string
     case Organizers = 'organizers';
     case Supporters = 'supporters';
     case Footer = 'footer';
-    case FooterContact = 'footer_contact';
 }
