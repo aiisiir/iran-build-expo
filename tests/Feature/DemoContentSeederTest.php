@@ -31,7 +31,7 @@ class DemoContentSeederTest extends TestCase
             $this->assertSame(6, \App\Models\Post::where('language_id', $lang->id)->where('translation_key', 'like', 'demo-post-news-%')->count());
             $this->assertSame(10, \App\Models\Link::whereHas('group', fn ($q) => $q->where('language_id', $lang->id)->where('placement', 'supporters'))->whereNotNull('icon_media_id')->count());
             $this->assertSame(1, \App\Models\Gallery::where('language_id', $lang->id)->count());
-            $this->assertSame(10, \App\Models\GalleryItem::whereHas('gallery', fn ($q) => $q->where('language_id', $lang->id))->count());
+            $this->assertSame(10, \App\Models\GalleryItem::whereIn('gallery_id', \App\Models\Gallery::where('language_id', $lang->id)->select('id'))->count());
         }
 
         foreach (Page::where('status', 'published')->get() as $page) {
